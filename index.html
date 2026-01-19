@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="狼人杀游戏记录工具，帮助记录玩家发言和投票信息">
+  <title>狼人杀记录器</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-odd: #f8f9fa;
+      --bg-current: #cfe2ff;
+      --bg-highlight: #d1e7dd;
+      --border-color: #dee2e6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-size: 14px;
+    }
+
+    .wrap {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+    }
+
+    /* 左侧记录区 */
+    .log {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .log:empty::before {
+      content: '暂无记录';
+      color: #aaa;
+      display: block;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .log .item {
+      padding: 8px 10px 8px 50px;
+      min-height: 36px;
+      position: relative;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      line-height: 1.5;
+      transition: background-color 0.15s;
+    }
+
+    .log .item .name {
+      position: absolute;
+      left: 8px;
+      font-weight: 600;
+      color: #0d6efd;
+    }
+
+    .log .item .txt {
+      color: #333;
+    }
+
+    .log .item:nth-of-type(odd) {
+      background-color: var(--bg-odd);
+    }
+
+    .log .item:hover:not(.current) {
+      background-color: #e9ecef;
+    }
+
+    .log .item.current {
+      background-color: var(--bg-current);
+      border: 1px dashed #6c9bd1;
+    }
+
+    .log .item.highlight {
+      background-color: var(--bg-highlight);
+      border-left: 3px solid #198754;
+    }
+
+    .log .round-divider {
+      border: 0;
+      border-top: 2px dashed #adb5bd;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .log .round-divider::after {
+      content: '轮次分隔';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 0 10px;
+      font-size: 11px;
+      color: #adb5bd;
+    }
+
+    /* 右侧工具区 */
+    .tools-box {
+      flex: 1;
+      flex-shrink: 0;
+      overflow: auto;
+      padding: 12px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: #6c757d;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    /* 玩家设置区 */
+    .player-config {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .player-config .form-select {
+      flex: 1;
+    }
+
+    .player-config .player-count {
+      width: 70px;
+    }
+
+    /* 快捷按钮组 */
+    .quick-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .quick-btns .btn {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    /* 分类标签 */
+    .btn-category {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .btn-category .label {
+      font-size: 11px;
+      color: #888;
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    /* 输入区 */
+    .input-area {
+      position: relative;
+    }
+
+    .input-area textarea {
+      font-size: 13px;
+      resize: none;
+    }
+
+    .input-area .btn-clear {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      opacity: 0.5;
+      padding: 0 6px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .input-area .btn-clear:hover {
+      opacity: 1;
+    }
+
+    /* 操作栏 */
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .action-bar .nav-btns {
+      display: flex;
+      gap: 4px;
+    }
+
+    .action-bar .spacer {
+      flex: 1;
+    }
+
+    /* 快捷键提示 */
+    .shortcut-hint {
+      font-size: 11px;
+      color: #aaa;
+      text-align: center;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .wrap {
+        flex-direction: column;
+      }
+
+      .log {
+        flex: none;
+        height: 35%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .log .round-divider::after {
+        display: none;
+      }
+
+      .tools-box {
+        flex: 1;
+        overflow: auto;
+      }
+
+      .btn-category .label {
+        width: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- 左侧记录区 -->
+  <div class="log" id="logArea">
+    <div class="item current" id="currentLog">
+      <span class="name text-primary">?号：</span>
+      <span class="txt">选择玩家开始记录</span>
+    </div>
+  </div>
+
+  <!-- 右侧工具区 -->
+  <div class="tools-box">
+    <!-- 玩家选择 -->
+    <div>
+      <div class="section-title">当前玩家</div>
+      <div class="player-config">
+        <select id="players" class="form-select form-select-sm"></select>
+        <input type="number" id="playerCount" class="form-control form-control-sm player-count"
+               min="6" max="18" value="12" title="玩家人数">
+        <button id="btnSetPlayers" class="btn btn-outline-secondary btn-sm" title="设置人数">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 快捷按钮 -->
+    <div>
+      <div class="section-title">快捷记录</div>
+
+      <div class="btn-category">
+        <span class="label">身份:</span>
+        <div class="quick-btns btnsTxt">
+          <button class="btn btn-info">预言家</button>
+          <button class="btn btn-info">女巫</button>
+          <button class="btn btn-info">猎人</button>
+          <button class="btn btn-info">守卫</button>
+          <button class="btn btn-outline-secondary">民</button>
+          <button class="btn btn-outline-secondary">神</button>
+        </div>
+      </div>
+
+      <div class="btn-category">
+        <span class="label">验人:</span>
+        <div class="quick-btns btnsTxt">
+          <button class="btn btn-success">金水</button>
+          <button class="btn btn-danger">查杀</button>
+          <button class="btn btn-outline-secondary">银水</button>
+          <button class="btn btn-outline-secondary">警徽流</button>
+        </div>
+      </div>
+
+      <div class="btn-category">
+        <span class="label">站边:</span>
+        <div class="quick-btns btnsTxt">
+          <button class="btn btn-primary">站边</button>
+          <button class="btn btn-warning">怼</button>
+          <button class="btn btn-danger">狼坑</button>
+          <button class="btn btn-outline-secondary">绑定</button>
+          <button class="btn btn-outline-secondary">出局</button>
+        </div>
+      </div>
+
+      <div class="btn-category">
+        <span class="label">疑点:</span>
+        <div class="quick-btns btnsTxt">
+          <button class="btn btn-outline-warning">逻辑问题</button>
+          <button class="btn btn-outline-warning">状态问题</button>
+          <button class="btn btn-outline-warning">言票不一</button>
+          <button class="btn btn-outline-secondary">划水</button>
+        </div>
+      </div>
+
+      <div class="btn-category">
+        <span class="label">技能:</span>
+        <div class="quick-btns btnsTxt">
+          <button class="btn btn-outline-success">救</button>
+          <button class="btn btn-outline-danger">毒</button>
+          <button class="btn btn-outline-secondary">开枪</button>
+          <button class="btn btn-outline-secondary">守护</button>
+        </div>
+      </div>
+
+      <div class="btn-category">
+        <span class="label">玩家:</span>
+        <div class="quick-btns btnsTxt" id="playerNumbers"></div>
+      </div>
+    </div>
+
+    <!-- 输入区 -->
+    <div class="input-area">
+      <textarea id="textarea" class="form-control" rows="2"
+                placeholder="直接输入或点击上方按钮，如：怼3号逻辑问题"></textarea>
+      <button id="btnClear" class="btn btn-link btn-clear" title="清空 (Esc)">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-bar">
+      <div class="nav-btns">
+        <button id="btnPrevious" class="btn btn-outline-secondary btn-sm" title="上一位 (←)">
+          <i class="bi bi-chevron-left"></i> 上一位
+        </button>
+        <button id="btnNext" class="btn btn-outline-secondary btn-sm" title="下一位 (→)">
+          下一位 <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+      <button id="btnDone" class="btn btn-primary btn-sm" title="记录完成 (Ctrl+Enter)">
+        <i class="bi bi-check-lg"></i> 记录
+      </button>
+      <button id="btnRound" class="btn btn-outline-info btn-sm" title="标记轮次分隔">
+        <i class="bi bi-dash-lg"></i> 轮次
+      </button>
+      <span class="spacer"></span>
+      <button id="btnExport" class="btn btn-outline-success btn-sm" title="导出记录">
+        <i class="bi bi-download"></i>
+      </button>
+      <button id="btnRestart" class="btn btn-outline-danger btn-sm" title="重置">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </button>
+    </div>
+
+    <div class="shortcut-hint">
+      Ctrl+Enter 记录 | ← → 切换玩家 | Esc 清空
+    </div>
+  </div>
+</div>
+
+<!-- jQuery 4 + Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@4.0.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ==================== 配置 ====================
+  const CONFIG = {
+    STORAGE_KEY: 'werewolf_notepad_data',
+    DEFAULT_PLAYERS: 12,
+    MIN_PLAYERS: 6,
+    MAX_PLAYERS: 18,
+    SCROLL_DURATION: 100
+  };
+
+  // ==================== 状态管理 ====================
+  const state = {
+    currentPlayer: '',
+    playerCount: CONFIG.DEFAULT_PLAYERS
+  };
+
+  // ==================== DOM 缓存 ====================
+  const $elements = {};
+
+  // ==================== 工具函数 ====================
+  const utils = {
+    escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    },
+
+    scrollToBottom() {
+      const $log = $elements.logArea;
+      $log.animate({
+        scrollTop: $log.prop('scrollHeight') - $log.outerHeight()
+      }, CONFIG.SCROLL_DURATION);
+    },
+
+    getPlayerDisplayName(player) {
+      return player ? `${player}号` : '?号';
+    }
+  };
+
+  // ==================== 存储管理 ====================
+  const storage = {
+    save() {
+      try {
+        const data = {
+          currentPlayer: state.currentPlayer,
+          playerCount: state.playerCount,
+          logs: $elements.logArea.html(),
+          textarea: $elements.textarea.val(),
+          timestamp: Date.now()
+        };
+        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('保存失败:', e);
+      }
+    },
+
+    load() {
+      try {
+        const data = localStorage.getItem(CONFIG.STORAGE_KEY);
+        return data ? JSON.parse(data) : null;
+      } catch (e) {
+        console.warn('加载失败:', e);
+        return null;
+      }
+    },
+
+    clear() {
+      try {
+        localStorage.removeItem(CONFIG.STORAGE_KEY);
+      } catch (e) {
+        console.warn('清除失败:', e);
+      }
+    }
+  };
+
+  // ==================== 核心功能 ====================
+  const app = {
+    init() {
+      // 缓存 DOM 元素
+      $elements.players = $('#players');
+      $elements.textarea = $('#textarea');
+      $elements.logArea = $('#logArea');
+      $elements.currentLog = $('#currentLog');
+      $elements.playerCount = $('#playerCount');
+      $elements.playerNumbers = $('#playerNumbers');
+
+      // 初始化玩家列表
+      this.initPlayers(CONFIG.DEFAULT_PLAYERS);
+
+      // 绑定事件
+      this.bindEvents();
+
+      // 尝试恢复数据
+      this.restoreData();
+    },
+
+    // 初始化玩家选择和号码按钮
+    initPlayers(count) {
+      state.playerCount = count;
+      $elements.playerCount.val(count);
+
+      // 生成玩家下拉选项
+      let options = '<option value="">选择玩家</option>';
+      for (let i = 1; i <= count; i++) {
+        options += `<option value="${i}">${i}号</option>`;
+      }
+      $elements.players.html(options);
+
+      // 生成玩家号码按钮
+      let buttons = '';
+      for (let i = 1; i <= count; i++) {
+        buttons += `<button class="btn btn-outline-secondary">${i}</button>`;
+      }
+      $elements.playerNumbers.html(buttons);
+
+      // 重新绑定号码按钮事件
+      $elements.playerNumbers.find('.btn').on('click', function() {
+        const text = $(this).text();
+        $elements.textarea.val($elements.textarea.val() + text + ' ').focus();
+        app.updatePreview();
+      });
+
+      CONFIG.MAX_PLAYERS = count;
+    },
+
+    bindEvents() {
+      // 玩家人数设置
+      $('#btnSetPlayers').on('click', () => {
+        const count = parseInt($elements.playerCount.val());
+        if (count >= CONFIG.MIN_PLAYERS && count <= 18) {
+          this.initPlayers(count);
+          storage.save();
+        }
+      });
+
+      // 玩家选择
+      $elements.players.on('change', this.handlePlayerChange.bind(this));
+
+      // 文本输入
+      $elements.textarea.on('input', this.updatePreview.bind(this));
+
+      // 清空按钮
+      $('#btnClear').on('click', () => {
+        $elements.textarea.val('').focus();
+        this.updatePreview();
+      });
+
+      // 快捷文本按钮（排除玩家号码，单独处理）
+      $('.btnsTxt:not(#playerNumbers) .btn').on('click', function() {
+        const text = $(this).text();
+        $elements.textarea.val($elements.textarea.val() + text + ' ').focus();
+        app.updatePreview();
+      });
+
+      // 记录完成
+      $('#btnDone').on('click', this.completeRecord.bind(this));
+
+      // 一轮结束
+      $('#btnRound').on('click', this.endRound.bind(this));
+
+      // 上一位/下一位
+      $('#btnPrevious').on('click', () => this.switchPlayer(-1));
+      $('#btnNext').on('click', () => this.switchPlayer(1));
+
+      // 导出
+      $('#btnExport').on('click', this.exportData.bind(this));
+
+      // 重新开始
+      $('#btnRestart').on('click', this.restart.bind(this));
+
+      // 键盘快捷键
+      $(document).on('keydown', this.handleKeydown.bind(this));
+
+      // 自动保存
+      $(window).on('beforeunload', () => storage.save());
+      setInterval(() => storage.save(), 30000);
+    },
+
+    handlePlayerChange() {
+      state.currentPlayer = $elements.players.val();
+      const playerClass = '.player' + (state.currentPlayer || '0');
+
+      // 更新高亮
+      $('.log .item').removeClass('highlight');
+      $(playerClass).addClass('highlight');
+
+      // 清空输入框
+      $elements.textarea.val('').focus();
+      this.updatePreview();
+      storage.save();
+    },
+
+    updatePreview() {
+      const lines = $elements.textarea.val().split(/\r?\n/);
+      const playerName = utils.getPlayerDisplayName(state.currentPlayer);
+
+      let html = `<span class="name text-primary">${utils.escapeHtml(playerName)}：</span>`;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed) {
+          html += `<span class="txt">${utils.escapeHtml(trimmed)}，</span>`;
+        }
+      });
+
+      $elements.currentLog.html(html);
+    },
+
+    completeRecord() {
+      // 检查是否有内容
+      if (!$elements.textarea.val().trim()) {
+        $elements.textarea.focus();
+        return;
+      }
+
+      const playerNum = state.currentPlayer || '0';
+
+      // 克隆当前记录
+      $elements.currentLog
+        .clone()
+        .removeClass('current')
+        .removeAttr('id')
+        .addClass('player' + playerNum)
+        .insertBefore($elements.currentLog);
+
+      utils.scrollToBottom();
+      storage.save();
+
+      // 自动切换到下一位
+      this.switchPlayer(1);
+    },
+
+    endRound() {
+      $('<hr class="round-divider">').insertBefore($elements.currentLog);
+      utils.scrollToBottom();
+      storage.save();
+    },
+
+    switchPlayer(direction) {
+      let current = parseInt(state.currentPlayer) || 0;
+      current += direction;
+
+      if (current > state.playerCount) current = 1;
+      if (current < 1) current = state.playerCount;
+
+      $elements.players.val(current).trigger('change');
+    },
+
+    exportData() {
+      let exportText = '=== 狼人杀记录 ===\n';
+      exportText += '导出时间: ' + new Date().toLocaleString() + '\n';
+      exportText += '玩家人数: ' + state.playerCount + '\n\n';
+
+      $elements.logArea.find('.item:not(.current), .round-divider').each(function() {
+        if ($(this).hasClass('round-divider')) {
+          exportText += '\n--- 轮次分隔 ---\n\n';
+        } else {
+          const name = $(this).find('.name').text();
+          const content = [];
+          $(this).find('.txt').each(function() {
+            content.push($(this).text().replace(/，$/, ''));
+          });
+          exportText += name + content.join('；') + '\n';
+        }
+      });
+
+      const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `狼人杀记录_${new Date().toISOString().slice(0,10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+
+    restart() {
+      if (confirm('确定要清空所有记录吗？')) {
+        storage.clear();
+        location.reload();
+      }
+    },
+
+    restoreData() {
+      const data = storage.load();
+      if (data && data.logs) {
+        if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
+          if (confirm('发现上次记录，是否恢复？')) {
+            // 恢复玩家人数
+            if (data.playerCount) {
+              this.initPlayers(data.playerCount);
+            }
+
+            $elements.logArea.html(data.logs);
+            const $currentLog = $('#currentLog');
+            $elements.currentLog = $currentLog.length ? $currentLog : $('.current');
+
+            if (data.currentPlayer) {
+              $elements.players.val(data.currentPlayer);
+              state.currentPlayer = data.currentPlayer;
+            }
+            if (data.textarea) {
+              $elements.textarea.val(data.textarea);
+            }
+          } else {
+            storage.clear();
+          }
+        } else {
+          storage.clear();
+        }
+      }
+    },
+
+    handleKeydown(e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.completeRecord();
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        $elements.textarea.val('').focus();
+        this.updatePreview();
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        storage.save();
+        return;
+      }
+
+      if (!$(e.target).is('textarea, input, select')) {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          this.switchPlayer(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          this.switchPlayer(1);
+        }
+      }
+    }
+  };
+
+  $(document).ready(() => app.init());
+})();
+</script>
+
+</body>
+</html>
+
