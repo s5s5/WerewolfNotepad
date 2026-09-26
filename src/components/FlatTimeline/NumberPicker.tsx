@@ -21,7 +21,9 @@ export const NumberPicker = ({
       return;
     }
     onChange(
-      value.includes(n) ? value.filter((v) => v !== n) : [...value, n].sort((a, b) => a - b),
+      value.includes(n)
+        ? value.filter((v) => v !== n)
+        : [...value, n].sort((a, b) => a - b),
     );
   };
 

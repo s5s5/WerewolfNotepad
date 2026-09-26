@@ -34,7 +34,11 @@ const TagGroup = ({
             key={opt.label}
             type="button"
             onClick={() =>
-              dispatch({ type: 'TOGGLE_PLAYER_TAG', num: playerNum, tag: opt.label })
+              dispatch({
+                type: 'TOGGLE_PLAYER_TAG',
+                num: playerNum,
+                tag: opt.label,
+              })
             }
             className={`rounded border px-1.5 py-0.5 text-[10px] transition ${opt.className} ${
               tags.includes(opt.label) ? 'ring-2 ring-offset-1' : 'opacity-70'

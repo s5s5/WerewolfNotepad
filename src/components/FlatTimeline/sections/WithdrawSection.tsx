@@ -12,7 +12,9 @@ export const WithdrawSection = ({ phase, card, onPatch }: Props) => {
   return (
     <label
       className={`flex items-center gap-1.5 text-[11px] font-medium ${
-        disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-600'
+        disabled
+          ? 'cursor-not-allowed text-slate-300'
+          : 'cursor-pointer text-slate-600'
       }`}
     >
       <input

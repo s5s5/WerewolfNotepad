@@ -123,8 +123,7 @@ export interface SpeechOrderConfig {
 }
 
 export type NightDeathInfo =
-  | { type: 'peace' }
-  | { type: 'deaths'; players: number[] };
+  { type: 'peace' } | { type: 'deaths'; players: number[] };
 
 export type EliminationResult =
   | { type: 'exiled'; player: number; skillTrigger?: string }

@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { STANCE_OPTIONS, type ActionOption } from '../../../constants/cardOptions';
+import {
+  STANCE_OPTIONS,
+  type ActionOption,
+} from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData, StanceAction } from '../../../types/game';

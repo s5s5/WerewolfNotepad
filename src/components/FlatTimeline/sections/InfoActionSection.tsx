@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { INFO_ACTION_OPTIONS, type ActionOption } from '../../../constants/cardOptions';
+import {
+  INFO_ACTION_OPTIONS,
+  type ActionOption,
+} from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData } from '../../../types/game';
@@ -45,7 +48,11 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
       case '查杀':
       case '金水':
         onPatch({
-          seerCheck: { target: pendingTargets[0], result: pendingOpt.label, reason },
+          seerCheck: {
+            target: pendingTargets[0],
+            result: pendingOpt.label,
+            reason,
+          },
         });
         break;
       case '毒':

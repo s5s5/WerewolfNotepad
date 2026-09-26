@@ -139,7 +139,12 @@ export type GameAction =
         | { type: 'exiled'; player: number; skillTrigger?: string }
         | { type: 'tied_pk' };
     }
-  | { type: 'ADD_PK_ROUND'; day: number; scope: 'sheriff' | 'day'; players: number[] }
+  | {
+      type: 'ADD_PK_ROUND';
+      day: number;
+      scope: 'sheriff' | 'day';
+      players: number[];
+    }
   | {
       type: 'UPDATE_PK_SPEECH';
       day: number;
@@ -156,7 +161,12 @@ export type GameAction =
       records?: VoteRecord[];
       result?: EliminationResult;
     }
-  | { type: 'SET_FIRST_NIGHT_DEATH_SPEECH'; day: number; player: number; notes: string }
+  | {
+      type: 'SET_FIRST_NIGHT_DEATH_SPEECH';
+      day: number;
+      player: number;
+      notes: string;
+    }
   | { type: 'SET_EXIT_SPEECH'; day: number; player: number; notes: string }
   | {
       type: 'SET_BADGE_ACTION';
@@ -435,7 +445,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           idx === action.roundIndex
             ? {
                 ...r,
-                speeches: mergeSpeechCard(r.speeches, action.player, action.patch),
+                speeches: mergeSpeechCard(
+                  r.speeches,
+                  action.player,
+                  action.patch,
+                ),
               }
             : r,
         );

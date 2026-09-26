@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { SUGGESTION_OPTIONS, type ActionOption } from '../../../constants/cardOptions';
+import {
+  SUGGESTION_OPTIONS,
+  type ActionOption,
+} from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData, SuggestionAction } from '../../../types/game';

@@ -29,7 +29,9 @@ export const ClaimedIdentitySection = ({ card, onPatch }: Props) => {
             type="button"
             onClick={() => toggle(opt.label)}
             className={`rounded border px-2 py-0.5 text-[11px] transition ${opt.className} ${
-              claimed.includes(opt.label) ? 'ring-2 ring-offset-1' : 'opacity-70'
+              claimed.includes(opt.label)
+                ? 'ring-2 ring-offset-1'
+                : 'opacity-70'
             }`}
           >
             {opt.label}

@@ -23,7 +23,12 @@ export const DaytimeSpeechSection = ({ day, daytime }: Props) => {
       <SpeechOrderControl
         order={daytime.speechOrder}
         onSet={(o) =>
-          dispatch({ type: 'SET_SPEECH_ORDER', day, phase: 'daytime', order: o })
+          dispatch({
+            type: 'SET_SPEECH_ORDER',
+            day,
+            phase: 'daytime',
+            order: o,
+          })
         }
       />
 

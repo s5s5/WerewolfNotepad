@@ -8,7 +8,11 @@ interface Props {
   eligiblePlayers?: number[];
 }
 
-export const SpeechOrderControl = ({ order, onSet, eligiblePlayers }: Props) => {
+export const SpeechOrderControl = ({
+  order,
+  onSet,
+  eligiblePlayers,
+}: Props) => {
   const [firstSpeaker, setFirstSpeaker] = useState<number[]>(
     order ? [order.firstSpeaker] : [],
   );

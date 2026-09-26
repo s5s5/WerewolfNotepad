@@ -18,8 +18,12 @@ interface Props {
 const FirstNightDeathSpeech = ({ day, dayData }: Props) => {
   const { dispatch } = useGame();
   const deadPlayer =
-    dayData.nightDeath?.type === 'deaths' ? dayData.nightDeath.players[0] : undefined;
-  const [notes, setNotes] = useState(dayData.firstNightDeathSpeech?.notes || '');
+    dayData.nightDeath?.type === 'deaths'
+      ? dayData.nightDeath.players[0]
+      : undefined;
+  const [notes, setNotes] = useState(
+    dayData.firstNightDeathSpeech?.notes || '',
+  );
 
   if (!deadPlayer) return null;
 
@@ -61,9 +65,7 @@ export const DaySection = ({ day, dayData }: Props) => {
         onSet={(info) => dispatch({ type: 'SET_NIGHT_DEATH', day, info })}
       />
 
-      {day === 1 && (
-        <SheriffElection day={day} sheriff={dayData.sheriff} />
-      )}
+      {day === 1 && <SheriffElection day={day} sheriff={dayData.sheriff} />}
 
       {day > 1 && (
         <BadgeHandling
@@ -124,7 +126,11 @@ export const DaySection = ({ day, dayData }: Props) => {
           <button
             type="button"
             onClick={() =>
-              dispatch({ type: 'SET_DAY_VOTE', day, result: { type: 'tied_pk' } })
+              dispatch({
+                type: 'SET_DAY_VOTE',
+                day,
+                result: { type: 'tied_pk' },
+              })
             }
             className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
               dayData.dayVote?.result?.type === 'tied_pk'

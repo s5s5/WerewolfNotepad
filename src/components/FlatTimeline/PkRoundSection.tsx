@@ -63,7 +63,9 @@ const RoundView = ({
           结果：
           {round.result.type === 'exiled'
             ? `${round.result.player}号 出局${
-                round.result.skillTrigger ? `（${round.result.skillTrigger}）` : ''
+                round.result.skillTrigger
+                  ? `（${round.result.skillTrigger}）`
+                  : ''
               }`
             : '再次平票'}
         </p>
@@ -115,7 +117,13 @@ export const PkRoundSection = ({ day, scope, pkRounds }: Props) => {
   return (
     <div className="space-y-2">
       {pkRounds.map((round, idx) => (
-        <RoundView key={idx} day={day} scope={scope} round={round} roundIndex={idx} />
+        <RoundView
+          key={idx}
+          day={day}
+          scope={scope}
+          round={round}
+          roundIndex={idx}
+        />
       ))}
 
       {adding ? (
@@ -123,7 +131,11 @@ export const PkRoundSection = ({ day, scope, pkRounds }: Props) => {
           <span className="mb-1 block text-[11px] font-bold text-slate-600">
             选择 PK 玩家（通常 2 人）
           </span>
-          <NumberPicker value={newPkPlayers} onChange={setNewPkPlayers} mode="multi" />
+          <NumberPicker
+            value={newPkPlayers}
+            onChange={setNewPkPlayers}
+            mode="multi"
+          />
           <div className="mt-1.5 flex gap-1.5">
             <button
               type="button"

@@ -22,20 +22,31 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
   const setCandidates = (next: number[]) => {
     candidates.forEach((n) => {
       if (!next.includes(n)) {
-        dispatch({ type: 'SET_PLAYER_TAG', num: n, tag: POLICE_CANDIDATE_TAG, on: false });
+        dispatch({
+          type: 'SET_PLAYER_TAG',
+          num: n,
+          tag: POLICE_CANDIDATE_TAG,
+          on: false,
+        });
       }
     });
     next.forEach((n) => {
       if (!candidates.includes(n)) {
-        dispatch({ type: 'SET_PLAYER_TAG', num: n, tag: POLICE_CANDIDATE_TAG, on: true });
+        dispatch({
+          type: 'SET_PLAYER_TAG',
+          num: n,
+          tag: POLICE_CANDIDATE_TAG,
+          on: true,
+        });
       }
     });
     dispatch({ type: 'SET_SHERIFF_CANDIDATES', day, candidates: next });
   };
 
-  const nonCandidates = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1).filter(
-    (n) => !candidates.includes(n),
-  );
+  const nonCandidates = Array.from(
+    { length: PLAYER_COUNT },
+    (_, i) => i + 1,
+  ).filter((n) => !candidates.includes(n));
 
   return (
     <div className="space-y-2.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-3">
@@ -45,7 +56,11 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
         <span className="mb-1 block text-[10px] font-bold text-slate-500">
           上警名单
         </span>
-        <NumberPicker value={candidates} onChange={setCandidates} mode="multi" />
+        <NumberPicker
+          value={candidates}
+          onChange={setCandidates}
+          mode="multi"
+        />
         <p className="mt-1 text-[10px] text-slate-400">
           警下（有票）：{nonCandidates.map((n) => `${n}号`).join('、') || '无'}
         </p>
@@ -56,7 +71,12 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
           <SpeechOrderControl
             order={sheriff?.speechOrder}
             onSet={(o) =>
-              dispatch({ type: 'SET_SPEECH_ORDER', day, phase: 'sheriff', order: o })
+              dispatch({
+                type: 'SET_SPEECH_ORDER',
+                day,
+                phase: 'sheriff',
+                order: o,
+              })
             }
             eligiblePlayers={candidates}
           />
@@ -107,7 +127,8 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
                   })
                 }
                 className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
-                  sheriff?.result?.type === 'elected' && sheriff.result.player === p
+                  sheriff?.result?.type === 'elected' &&
+                  sheriff.result.player === p
                     ? 'border-indigo-500 bg-indigo-100 text-indigo-800'
                     : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
                 }`}
@@ -118,7 +139,11 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
             <button
               type="button"
               onClick={() =>
-                dispatch({ type: 'SET_SHERIFF_RESULT', day, result: { type: 'tied_pk' } })
+                dispatch({
+                  type: 'SET_SHERIFF_RESULT',
+                  day,
+                  result: { type: 'tied_pk' },
+                })
               }
               className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
                 sheriff?.result?.type === 'tied_pk'
@@ -130,7 +155,11 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
             </button>
           </div>
 
-          <PkRoundSection day={day} scope="sheriff" pkRounds={sheriff?.pkRounds || []} />
+          <PkRoundSection
+            day={day}
+            scope="sheriff"
+            pkRounds={sheriff?.pkRounds || []}
+          />
         </>
       )}
 

@@ -20,7 +20,8 @@ export const CLAIMED_IDENTITY_OPTIONS: ActionOption[] = [
   {
     label: '平民',
     needsTarget: false,
-    className: 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
+    className:
+      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
     label: '女巫',
@@ -43,18 +44,19 @@ export const CLAIMED_IDENTITY_OPTIONS: ActionOption[] = [
   {
     label: '强神',
     needsTarget: false,
-    className:
-      'bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100',
+    className: 'bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100',
   },
   {
     label: '划水',
     needsTarget: false,
-    className: 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
+    className:
+      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
     label: '自认狼',
     needsTarget: false,
-    className: 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-semibold',
+    className:
+      'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-semibold',
   },
 ];
 
@@ -63,7 +65,8 @@ export const STANCE_OPTIONS: ActionOption[] = [
     label: '站边',
     needsTarget: true,
     targetMode: 'single',
-    className: 'bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100 font-medium',
+    className:
+      'bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100 font-medium',
   },
   {
     label: '踩',
@@ -80,27 +83,31 @@ export const STANCE_OPTIONS: ActionOption[] = [
   {
     label: '不站边',
     needsTarget: false,
-    className: 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
+    className:
+      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
     label: '没站边',
     needsTarget: false,
-    className: 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
+    className:
+      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
-    label: '认好人',
+    label: '好人是',
     needsTarget: true,
     targetMode: 'multi',
-    className: 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100',
+    className:
+      'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100',
   },
   {
-    label: '认狼',
+    label: '狼是',
     needsTarget: true,
     targetMode: 'multi',
-    className: 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-semibold',
+    className:
+      'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-semibold',
   },
   {
-    label: '疑狼',
+    label: '狼疑是',
     needsTarget: true,
     targetMode: 'multi',
     className: 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100',
@@ -109,7 +116,8 @@ export const STANCE_OPTIONS: ActionOption[] = [
     label: '自定义',
     needsTarget: true,
     targetMode: 'multi',
-    className: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-100 font-medium',
+    className:
+      'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-100 font-medium',
   },
 ];
 
@@ -130,7 +138,8 @@ export const INFO_ACTION_OPTIONS: ActionOption[] = [
     label: '查杀',
     needsTarget: true,
     targetMode: 'single',
-    className: 'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold',
+    className:
+      'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold',
   },
   {
     label: '金水',
@@ -143,7 +152,8 @@ export const INFO_ACTION_OPTIONS: ActionOption[] = [
     label: '毒',
     needsTarget: true,
     targetMode: 'single',
-    className: 'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold',
+    className:
+      'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold',
   },
   {
     label: '银水',
@@ -156,7 +166,8 @@ export const INFO_ACTION_OPTIONS: ActionOption[] = [
     label: '警徽流',
     needsTarget: true,
     targetMode: 'multi',
-    className: 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold',
+    className:
+      'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold',
   },
 ];
 
@@ -165,23 +176,27 @@ export const SUGGESTION_OPTIONS: ActionOption[] = [
     label: '建议归票',
     needsTarget: true,
     targetMode: 'single',
-    className: 'bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100 font-medium',
+    className:
+      'bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100 font-medium',
   },
   {
     label: '建议出',
     needsTarget: true,
     targetMode: 'single',
-    className: 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-medium',
+    className:
+      'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-medium',
   },
   {
     label: '建议撕警徽',
     needsTarget: false,
-    className: 'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100 font-semibold',
+    className:
+      'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100 font-semibold',
   },
   {
     label: '建议PK',
     needsTarget: false,
-    className: 'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100',
+    className:
+      'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100',
   },
 ];
 

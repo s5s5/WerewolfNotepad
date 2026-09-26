@@ -56,7 +56,8 @@ export const VoteSection = ({
           />
           {eligibleTargets && (
             <p className="mt-0.5 text-[9px] text-slate-400">
-              可投目标：{eligibleTargets.map((n) => `${n}号`).join('、') || '无'}
+              可投目标：
+              {eligibleTargets.map((n) => `${n}号`).join('、') || '无'}
             </p>
           )}
         </div>
@@ -91,8 +92,8 @@ export const VoteSection = ({
               className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-2 py-1 text-[11px]"
             >
               <span>
-                <span className="font-bold text-amber-700">{r.target}号</span>{' '}
-                ({r.voters.length}票): {r.voters.map((n) => `${n}号`).join('、')}
+                <span className="font-bold text-amber-700">{r.target}号</span> (
+                {r.voters.length}票): {r.voters.map((n) => `${n}号`).join('、')}
               </span>
               <button
                 type="button"

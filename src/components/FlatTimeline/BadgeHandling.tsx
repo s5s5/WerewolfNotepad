@@ -24,7 +24,11 @@ export const BadgeHandling = ({ badgeAction, onSet }: Props) => {
         </p>
       )}
       <div className="space-y-1.5">
-        <NumberPicker value={transferTo} onChange={setTransferTo} mode="single" />
+        <NumberPicker
+          value={transferTo}
+          onChange={setTransferTo}
+          mode="single"
+        />
         <div className="flex gap-1.5">
           <button
             type="button"
