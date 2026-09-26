@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SUGGESTION_OPTIONS, type ActionOption } from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
+import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData, SuggestionAction } from '../../../types/game';
 
 interface Props {
@@ -13,6 +14,7 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
   const suggestions = card.suggestions || [];
   const [pendingOpt, setPendingOpt] = useState<ActionOption | null>(null);
   const [pendingTargets, setPendingTargets] = useState<number[]>([]);
+  const [pendingReason, setPendingReason] = useState('');
 
   const removeSuggestion = (idx: number) => {
     onPatch({ suggestions: suggestions.filter((_, i) => i !== idx) });
@@ -25,6 +27,7 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
     }
     setPendingOpt(opt);
     setPendingTargets([]);
+    setPendingReason('');
   };
 
   const confirmTargeted = () => {
@@ -32,17 +35,25 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
     onPatch({
       suggestions: [
         ...suggestions,
-        { type: pendingOpt.label, targets: pendingTargets },
+        {
+          type: pendingOpt.label,
+          targets: pendingTargets,
+          reason: pendingReason.trim() || undefined,
+        },
       ],
     });
     setPendingOpt(null);
     setPendingTargets([]);
+    setPendingReason('');
   };
 
-  const describe = (s: SuggestionAction) =>
-    s.targets && s.targets.length > 0
-      ? `${s.type} ${s.targets.map((t) => `${t}号`).join('、')}`
-      : s.type;
+  const describe = (s: SuggestionAction) => {
+    const base =
+      s.targets && s.targets.length > 0
+        ? `${s.type} ${s.targets.map((t) => `${t}号`).join('、')}`
+        : s.type;
+    return s.reason ? `${base}（${s.reason}）` : base;
+  };
 
   return (
     <div>
@@ -98,6 +109,7 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
             mode={pendingOpt.targetMode || 'single'}
             excludePlayer={playerNum}
           />
+          <ReasonPicker value={pendingReason} onChange={setPendingReason} />
           <button
             type="button"
             disabled={pendingTargets.length === 0}

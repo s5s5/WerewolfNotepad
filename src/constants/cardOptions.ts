@@ -105,6 +105,24 @@ export const STANCE_OPTIONS: ActionOption[] = [
     targetMode: 'multi',
     className: 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100',
   },
+  {
+    label: '自定义',
+    needsTarget: true,
+    targetMode: 'multi',
+    className: 'bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-100 font-medium',
+  },
+];
+
+/** 常点原因预设，供 ReasonPicker 展示为快捷标签 */
+export const COMMON_REASONS = [
+  '逻辑问题',
+  '发言水',
+  '位置学',
+  '悍跳',
+  '心态崩',
+  '抢麦',
+  '投票诡异',
+  '带节奏',
 ];
 
 export const INFO_ACTION_OPTIONS: ActionOption[] = [

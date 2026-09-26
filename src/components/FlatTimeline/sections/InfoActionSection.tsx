@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { INFO_ACTION_OPTIONS, type ActionOption } from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
+import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData } from '../../../types/game';
 
 interface Props {
@@ -14,10 +15,12 @@ const MAX_BADGE_FLOW = 3;
 export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
   const [pendingOpt, setPendingOpt] = useState<ActionOption | null>(null);
   const [pendingTargets, setPendingTargets] = useState<number[]>([]);
+  const [pendingReason, setPendingReason] = useState('');
 
   const openPicker = (opt: ActionOption) => {
     setPendingOpt(opt);
     setPendingTargets([]);
+    setPendingReason('');
   };
 
   const handlePickerChange = (next: number[]) => {
@@ -37,16 +40,19 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
 
   const confirmTargeted = () => {
     if (!pendingOpt || pendingTargets.length === 0) return;
+    const reason = pendingReason.trim() || undefined;
     switch (pendingOpt.label) {
       case '查杀':
       case '金水':
-        onPatch({ seerCheck: { target: pendingTargets[0], result: pendingOpt.label } });
+        onPatch({
+          seerCheck: { target: pendingTargets[0], result: pendingOpt.label, reason },
+        });
         break;
       case '毒':
-        onPatch({ poison: { target: pendingTargets[0] } });
+        onPatch({ poison: { target: pendingTargets[0], reason } });
         break;
       case '银水':
-        onPatch({ silverWater: { target: pendingTargets[0] } });
+        onPatch({ silverWater: { target: pendingTargets[0], reason } });
         break;
       case '警徽流':
         onPatch({ badgeFlow: pendingTargets });
@@ -54,27 +60,32 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
     }
     setPendingOpt(null);
     setPendingTargets([]);
+    setPendingReason('');
   };
 
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
   if (card.seerCheck) {
     chips.push({
       key: 'seerCheck',
-      label: `${card.seerCheck.target}号 · ${card.seerCheck.result}`,
+      label: `${card.seerCheck.target}号 · ${card.seerCheck.result}${
+        card.seerCheck.reason ? `（${card.seerCheck.reason}）` : ''
+      }`,
       onRemove: () => onPatch({ seerCheck: undefined }),
     });
   }
   if (card.poison) {
     chips.push({
       key: 'poison',
-      label: `${card.poison.target}号 · 毒`,
+      label: `${card.poison.target}号 · 毒${card.poison.reason ? `（${card.poison.reason}）` : ''}`,
       onRemove: () => onPatch({ poison: undefined }),
     });
   }
   if (card.silverWater) {
     chips.push({
       key: 'silverWater',
-      label: `${card.silverWater.target}号 · 银水`,
+      label: `${card.silverWater.target}号 · 银水${
+        card.silverWater.reason ? `（${card.silverWater.reason}）` : ''
+      }`,
       onRemove: () => onPatch({ silverWater: undefined }),
     });
   }
@@ -143,6 +154,9 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
             mode={pendingOpt.targetMode || 'single'}
             excludePlayer={playerNum}
           />
+          {pendingOpt.label !== '警徽流' && (
+            <ReasonPicker value={pendingReason} onChange={setPendingReason} />
+          )}
           <button
             type="button"
             disabled={pendingTargets.length === 0}

@@ -74,28 +74,33 @@ export type PkScope = 'sheriff' | 'day';
 export interface SeerCheckAction {
   target: number;
   result: '金水' | '查杀';
+  reason?: string;
 }
 
 /** 银水动作（发言者声称某人是银水） */
 export interface SilverWaterAction {
   target: number;
+  reason?: string;
 }
 
 /** 毒动作（发言者声称女巫毒了某人） */
 export interface PoisonAction {
   target: number;
+  reason?: string;
 }
 
 /** 立场动作（发言者对某人表态），type 从 STANCE_OPTIONS 配置中取值 */
 export interface StanceAction {
   type: string;
   targets?: number[];
+  reason?: string;
 }
 
 /** 建议动作（发言者提出的带目标建议），type 从 SUGGESTION_OPTIONS 配置中取值 */
 export interface SuggestionAction {
   type: string;
   targets?: number[];
+  reason?: string;
 }
 
 /** 单张发言卡片的完整结构化数据 */
