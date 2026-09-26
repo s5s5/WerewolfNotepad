@@ -2,10 +2,7 @@ import { useEffect } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { ModalProvider } from './context/ModalContext';
 import { Header } from './components/Header/Header';
-import { Timeline } from './components/Timeline/Timeline';
-import { SeatsMatrix } from './components/SeatsMatrix/SeatsMatrix';
-import { PlayerTagging } from './components/PlayerTagging/PlayerTagging';
-import { SpeechComposer } from './components/SpeechComposer/SpeechComposer';
+import { FlatTimeline } from './components/FlatTimeline/FlatTimeline';
 import { PlayerPickerModal } from './components/modals/PlayerPickerModal';
 import { SeerCheckModal } from './components/modals/SeerCheckModal';
 import { NightDeathModal } from './components/modals/NightDeathModal';
@@ -43,15 +40,8 @@ const AppContent = () => {
     <>
       <KeyboardShortcuts />
       <Header />
-      <main className="relative flex flex-1 flex-col overflow-hidden md:flex-row">
-        <Timeline />
-        <section className="flex h-[60%] flex-1 flex-col overflow-hidden bg-white md:h-full">
-          <SeatsMatrix />
-          <div className="flex-1 space-y-3.5 overflow-y-auto p-3.5">
-            <PlayerTagging />
-            <SpeechComposer />
-          </div>
-        </section>
+      <main className="relative flex flex-1 flex-col overflow-y-auto bg-white">
+        <FlatTimeline />
       </main>
 
       <PlayerPickerModal />

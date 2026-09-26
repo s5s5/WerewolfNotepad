@@ -1,33 +1,8 @@
 import { useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import { useModalActions } from '../../context/ModalContext';
 import { ROLE_OPTIONS, SEAT_OPTIONS } from '../../constants/roles';
 import type { RoleName } from '../../types/game';
 import { ResetConfirmModal } from '../modals/ResetConfirmModal';
-
-const NightDeathButton = () => {
-  const { openNightDeathModal } = useModalActions();
-  return (
-    <button
-      onClick={openNightDeathModal}
-      className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-200"
-    >
-      <span>昨晚死者</span>
-    </button>
-  );
-};
-
-const VoteButton = () => {
-  const { openVoteModal } = useModalActions();
-  return (
-    <button
-      onClick={openVoteModal}
-      className="flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-2xs transition hover:bg-indigo-100"
-    >
-      <span>票型记录</span>
-    </button>
-  );
-};
 
 export const Header = () => {
   const { state, dispatch } = useGame();
@@ -83,37 +58,6 @@ export const Header = () => {
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5">
-          <button
-            onClick={() => dispatch({ type: 'PREV_ROUND' })}
-            title="上一天"
-            className="flex h-6 w-6 items-center justify-center rounded text-xs text-slate-600 transition hover:bg-white hover:text-slate-900"
-          >
-            &lt;
-          </button>
-          <span className="px-2 text-xs font-bold text-slate-700 select-none">
-            第 {state.currentRound} 天
-          </span>
-          <button
-            onClick={() => dispatch({ type: 'NEXT_ROUND' })}
-            title="下一天"
-            className="flex h-6 w-6 items-center justify-center rounded text-xs text-slate-600 transition hover:bg-white hover:text-slate-900"
-          >
-            &gt;
-          </button>
-        </div>
-
-        <NightDeathButton />
-        <VoteButton />
-
-        <button
-          onClick={() => dispatch({ type: 'INSERT_DIVIDER' })}
-          title="在时间线中插入分割线"
-          className="rounded-lg border border-slate-200 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-200"
-        >
-          分割线
-        </button>
-
         <button
           onClick={() => setResetOpen(true)}
           title="清空全部重来"

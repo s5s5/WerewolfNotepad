@@ -1,15 +1,33 @@
 import { useEffect, useReducer } from 'react';
 import { PLAYER_COUNT, STORAGE_KEY } from '../constants/roles';
-import type {
-  GameState,
-  LogEntry,
-  PersistedGameState,
-  Player,
-  RoleName,
+import {
+  DAY_COUNT,
+  type DayData,
+  type EliminationResult,
+  type GameState,
+  type LogEntry,
+  type NightDeathInfo,
+  type PersistedGameState,
+  type Player,
+  type RoleName,
+  type SpeechCardData,
+  type SpeechOrderConfig,
+  type SpeechPhase,
+  type VoteRecord,
 } from '../types/game';
 
 const createInitialPlayers = (): Player[] =>
   Array.from({ length: PLAYER_COUNT }, (_, i) => ({ num: i + 1, tags: [] }));
+
+const createEmptyDayData = (): DayData => ({
+  daytime: { speeches: {} },
+});
+
+const createInitialDays = (): Record<number, DayData> => {
+  const days: Record<number, DayData> = {};
+  for (let d = 1; d <= DAY_COUNT; d++) days[d] = createEmptyDayData();
+  return days;
+};
 
 const createInitialState = (): GameState => ({
   mySeat: '',
@@ -20,6 +38,7 @@ const createInitialState = (): GameState => ({
   players: createInitialPlayers(),
   currentSpeechChips: [],
   logs: [],
+  days: createInitialDays(),
 });
 
 const loadFromStorage = (): Partial<GameState> | null => {
@@ -35,6 +54,10 @@ const loadFromStorage = (): Partial<GameState> | null => {
         currentPlayer: data.currentPlayer || 1,
         players: data.players,
         logs: data.logs || [],
+        days:
+          data.days && Object.keys(data.days).length > 0
+            ? { ...createInitialDays(), ...data.days }
+            : createInitialDays(),
       };
     }
   } catch (e) {
@@ -52,6 +75,7 @@ const saveToStorage = (state: GameState) => {
       currentPlayer: state.currentPlayer,
       players: state.players,
       logs: state.logs,
+      days: state.days,
       timestamp: Date.now(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -81,13 +105,117 @@ export type GameAction =
   | { type: 'UPDATE_LOG_CONTENT'; id: string; content: string }
   | { type: 'DELETE_LOG'; id: string }
   | { type: 'INSERT_DIVIDER' }
-  | { type: 'RESET_ALL' };
+  | { type: 'RESET_ALL' }
+  // === v2 平铺时间轴 actions ===
+  | {
+      type: 'UPDATE_SPEECH_CARD';
+      day: number;
+      phase: SpeechPhase;
+      player: number;
+      patch: Partial<SpeechCardData>;
+    }
+  | { type: 'SET_NIGHT_DEATH'; day: number; info: NightDeathInfo }
+  | { type: 'SET_SHERIFF_CANDIDATES'; day: number; candidates: number[] }
+  | {
+      type: 'SET_SPEECH_ORDER';
+      day: number;
+      phase: SpeechPhase;
+      order: SpeechOrderConfig;
+    }
+  | {
+      type: 'SET_SHERIFF_RESULT';
+      day: number;
+      result:
+        | { type: 'elected'; player: number }
+        | { type: 'tied_pk' }
+        | { type: 'badge_lost' };
+    }
+  | { type: 'SET_SHERIFF_VOTES'; day: number; records: VoteRecord[] }
+  | {
+      type: 'SET_DAY_VOTE';
+      day: number;
+      records?: VoteRecord[];
+      result?:
+        | { type: 'exiled'; player: number; skillTrigger?: string }
+        | { type: 'tied_pk' };
+    }
+  | { type: 'ADD_PK_ROUND'; day: number; scope: 'sheriff' | 'day'; players: number[] }
+  | {
+      type: 'UPDATE_PK_SPEECH';
+      day: number;
+      scope: 'sheriff' | 'day';
+      roundIndex: number;
+      player: number;
+      patch: Partial<SpeechCardData>;
+    }
+  | {
+      type: 'SET_PK_RESULT';
+      day: number;
+      scope: 'sheriff' | 'day';
+      roundIndex: number;
+      records?: VoteRecord[];
+      result?: EliminationResult;
+    }
+  | { type: 'SET_FIRST_NIGHT_DEATH_SPEECH'; day: number; player: number; notes: string }
+  | { type: 'SET_EXIT_SPEECH'; day: number; player: number; notes: string }
+  | {
+      type: 'SET_BADGE_ACTION';
+      day: number;
+      action: '移交' | '撕警徽';
+      transferTo?: number;
+    };
 
 const makeLogId = (prefix: string) =>
   `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 
 const nowTimeString = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+const getDay = (state: GameState, day: number): DayData =>
+  state.days[day] || createEmptyDayData();
+
+const updateDay = (
+  state: GameState,
+  day: number,
+  updater: (d: DayData) => DayData,
+): GameState => ({
+  ...state,
+  days: { ...state.days, [day]: updater(getDay(state, day)) },
+});
+
+const mergeSpeechCard = (
+  speeches: Record<number, SpeechCardData>,
+  player: number,
+  patch: Partial<SpeechCardData>,
+): Record<number, SpeechCardData> => ({
+  ...speeches,
+  [player]: { ...speeches[player], ...patch },
+});
+
+const getPkRounds = (
+  dayData: DayData,
+  scope: 'sheriff' | 'day',
+): NonNullable<DayData['pkRounds']> => {
+  if (scope === 'sheriff') return dayData.sheriff?.pkRounds || [];
+  return dayData.pkRounds || [];
+};
+
+const setPkRounds = (
+  dayData: DayData,
+  scope: 'sheriff' | 'day',
+  pkRounds: NonNullable<DayData['pkRounds']>,
+): DayData => {
+  if (scope === 'sheriff') {
+    return {
+      ...dayData,
+      sheriff: {
+        ...(dayData.sheriff || { candidates: [], speeches: {} }),
+        pkRounds,
+      },
+    };
+  }
+  return { ...dayData, pkRounds };
+};
 
 const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
@@ -204,6 +332,149 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       };
     case 'RESET_ALL':
       return createInitialState();
+
+    case 'UPDATE_SPEECH_CARD': {
+      return updateDay(state, action.day, (d) => {
+        if (action.phase === 'sheriff') {
+          const sheriff = d.sheriff || { candidates: [], speeches: {} };
+          return {
+            ...d,
+            sheriff: {
+              ...sheriff,
+              speeches: mergeSpeechCard(
+                sheriff.speeches,
+                action.player,
+                action.patch,
+              ),
+            },
+          };
+        }
+        return {
+          ...d,
+          daytime: {
+            ...d.daytime,
+            speeches: mergeSpeechCard(
+              d.daytime.speeches,
+              action.player,
+              action.patch,
+            ),
+          },
+        };
+      });
+    }
+
+    case 'SET_NIGHT_DEATH':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        nightDeath: action.info,
+      }));
+
+    case 'SET_SHERIFF_CANDIDATES':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        sheriff: {
+          ...(d.sheriff || { speeches: {} }),
+          candidates: action.candidates,
+        },
+      }));
+
+    case 'SET_SPEECH_ORDER':
+      return updateDay(state, action.day, (d) => {
+        if (action.phase === 'sheriff') {
+          return {
+            ...d,
+            sheriff: {
+              ...(d.sheriff || { candidates: [], speeches: {} }),
+              speechOrder: action.order,
+            },
+          };
+        }
+        return { ...d, daytime: { ...d.daytime, speechOrder: action.order } };
+      });
+
+    case 'SET_SHERIFF_RESULT':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        sheriff: {
+          ...(d.sheriff || { candidates: [], speeches: {} }),
+          result: action.result,
+        },
+      }));
+
+    case 'SET_SHERIFF_VOTES':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        sheriff: {
+          ...(d.sheriff || { candidates: [], speeches: {} }),
+          voteRecords: action.records,
+        },
+      }));
+
+    case 'SET_DAY_VOTE':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        dayVote: {
+          records: action.records ?? d.dayVote?.records,
+          result: action.result ?? d.dayVote?.result,
+        },
+      }));
+
+    case 'ADD_PK_ROUND':
+      return updateDay(state, action.day, (d) => {
+        const rounds = getPkRounds(d, action.scope);
+        return setPkRounds(d, action.scope, [
+          ...rounds,
+          { players: action.players, speeches: {} },
+        ]);
+      });
+
+    case 'UPDATE_PK_SPEECH':
+      return updateDay(state, action.day, (d) => {
+        const rounds = getPkRounds(d, action.scope);
+        const nextRounds = rounds.map((r, idx) =>
+          idx === action.roundIndex
+            ? {
+                ...r,
+                speeches: mergeSpeechCard(r.speeches, action.player, action.patch),
+              }
+            : r,
+        );
+        return setPkRounds(d, action.scope, nextRounds);
+      });
+
+    case 'SET_PK_RESULT':
+      return updateDay(state, action.day, (d) => {
+        const rounds = getPkRounds(d, action.scope);
+        const nextRounds = rounds.map((r, idx) =>
+          idx === action.roundIndex
+            ? {
+                ...r,
+                voteRecords: action.records ?? r.voteRecords,
+                result: action.result ?? r.result,
+              }
+            : r,
+        );
+        return setPkRounds(d, action.scope, nextRounds);
+      });
+
+    case 'SET_FIRST_NIGHT_DEATH_SPEECH':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        firstNightDeathSpeech: { player: action.player, notes: action.notes },
+      }));
+
+    case 'SET_EXIT_SPEECH':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        exitSpeech: { player: action.player, notes: action.notes },
+      }));
+
+    case 'SET_BADGE_ACTION':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        badgeAction: { action: action.action, transferTo: action.transferTo },
+      }));
+
     default:
       return state;
   }
