@@ -132,6 +132,31 @@ export interface DayVoteData {
     | { type: 'tied_pk' };
 }
 
+export type MentionScene =
+  | 'sheriff'
+  | 'sheriffPk'
+  | 'daytime'
+  | 'dayPk'
+  | 'firstNightDeath'
+  | 'exitSpeech'
+  | 'candidacy'
+  | 'sheriffVote'
+  | 'dayVote'
+  | 'pkVote'
+  | 'badge'
+  | 'nightDeath';
+
+/** 反向查询：某个目标玩家在第几天、哪个环节、被谁、如何提及。speaker 为空表示系统事件或自身行为 */
+export interface PlayerMention {
+  day: number;
+  scene: MentionScene;
+  round?: number;
+  speaker?: number;
+  target: number;
+  action: string;
+  reason?: string;
+}
+
 export interface DayData {
   nightDeath?: NightDeathInfo;
   sheriff?: SheriffData;

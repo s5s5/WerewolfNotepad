@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { Header } from './components/Header/Header';
 import { FlatTimeline } from './components/FlatTimeline/FlatTimeline';
+import { MentionsPanel } from './components/MentionsPanel/MentionsPanel';
 
 const KeyboardShortcuts = () => {
   const { dispatch } = useGame();
@@ -38,6 +39,7 @@ const AppContent = () => {
       <main className="relative flex flex-1 flex-col overflow-y-auto bg-white">
         <FlatTimeline />
       </main>
+      <MentionsPanel />
     </>
   );
 };
