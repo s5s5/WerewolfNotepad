@@ -5,7 +5,6 @@ import {
   type DayData,
   type EliminationResult,
   type GameState,
-  type LogEntry,
   type NightDeathInfo,
   type PersistedGameState,
   type Player,
@@ -36,8 +35,6 @@ const createInitialState = (): GameState => ({
   currentPlayer: 1,
   filterCurrentPlayerOnly: false,
   players: createInitialPlayers(),
-  currentSpeechChips: [],
-  logs: [],
   days: createInitialDays(),
 });
 
@@ -53,7 +50,6 @@ const loadFromStorage = (): Partial<GameState> | null => {
         currentRound: data.currentRound || 1,
         currentPlayer: data.currentPlayer || 1,
         players: data.players,
-        logs: data.logs || [],
         days:
           data.days && Object.keys(data.days).length > 0
             ? { ...createInitialDays(), ...data.days }
@@ -74,7 +70,6 @@ const saveToStorage = (state: GameState) => {
       currentRound: state.currentRound,
       currentPlayer: state.currentPlayer,
       players: state.players,
-      logs: state.logs,
       days: state.days,
       timestamp: Date.now(),
     };
@@ -96,15 +91,6 @@ export type GameAction =
   | { type: 'TOGGLE_PLAYER_TAG'; num: number; tag: string }
   | { type: 'REMOVE_PLAYER_TAG'; num: number; tag: string }
   | { type: 'SET_PLAYER_TAG'; num: number; tag: string; on: boolean }
-  | { type: 'ADD_SPEECH_CHIP'; text: string }
-  | { type: 'REMOVE_SPEECH_CHIP'; index: number }
-  | { type: 'CLEAR_SPEECH_CHIPS' }
-  | { type: 'SET_SPEECH_CHIPS'; chips: string[] }
-  | { type: 'SAVE_SPEECH'; content: string }
-  | { type: 'ADD_LOG'; log: LogEntry }
-  | { type: 'UPDATE_LOG_CONTENT'; id: string; content: string }
-  | { type: 'DELETE_LOG'; id: string }
-  | { type: 'INSERT_DIVIDER' }
   | { type: 'RESET_ALL' }
   // === v2 平铺时间轴 actions ===
   | {
@@ -162,24 +148,11 @@ export type GameAction =
       result?: EliminationResult;
     }
   | {
-      type: 'SET_FIRST_NIGHT_DEATH_SPEECH';
-      day: number;
-      player: number;
-      notes: string;
-    }
-  | { type: 'SET_EXIT_SPEECH'; day: number; player: number; notes: string }
-  | {
       type: 'SET_BADGE_ACTION';
       day: number;
       action: '移交' | '撕警徽';
       transferTo?: number;
     };
-
-const makeLogId = (prefix: string) =>
-  `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-
-const nowTimeString = () =>
-  new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const getDay = (state: GameState, day: number): DayData =>
   state.days[day] || createEmptyDayData();
@@ -285,61 +258,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       });
       return { ...state, players };
     }
-    case 'ADD_SPEECH_CHIP':
-      if (!action.text) return state;
-      return {
-        ...state,
-        currentSpeechChips: [...state.currentSpeechChips, action.text],
-      };
-    case 'REMOVE_SPEECH_CHIP':
-      return {
-        ...state,
-        currentSpeechChips: state.currentSpeechChips.filter(
-          (_, i) => i !== action.index,
-        ),
-      };
-    case 'CLEAR_SPEECH_CHIPS':
-      return { ...state, currentSpeechChips: [] };
-    case 'SET_SPEECH_CHIPS':
-      return { ...state, currentSpeechChips: action.chips };
-    case 'SAVE_SPEECH': {
-      const newLog: LogEntry = {
-        id: makeLogId('log'),
-        type: 'speech',
-        player: state.currentPlayer,
-        round: state.currentRound,
-        time: nowTimeString(),
-        content: action.content,
-      };
-      return {
-        ...state,
-        logs: [...state.logs, newLog],
-        currentSpeechChips: [],
-      };
-    }
-    case 'ADD_LOG':
-      return { ...state, logs: [...state.logs, action.log] };
-    case 'UPDATE_LOG_CONTENT':
-      return {
-        ...state,
-        logs: state.logs.map((l) =>
-          l.id === action.id ? { ...l, content: action.content } : l,
-        ),
-      };
-    case 'DELETE_LOG':
-      return { ...state, logs: state.logs.filter((l) => l.id !== action.id) };
-    case 'INSERT_DIVIDER':
-      return {
-        ...state,
-        logs: [
-          ...state.logs,
-          {
-            id: makeLogId('divider'),
-            type: 'divider',
-            title: `第 ${state.currentRound} 天 轮次节点`,
-          },
-        ],
-      };
     case 'RESET_ALL':
       return createInitialState();
 
@@ -356,6 +274,24 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                 action.player,
                 action.patch,
               ),
+            },
+          };
+        }
+        if (action.phase === 'firstNightDeath') {
+          return {
+            ...d,
+            firstNightDeathSpeech: {
+              player: action.player,
+              card: { ...d.firstNightDeathSpeech?.card, ...action.patch },
+            },
+          };
+        }
+        if (action.phase === 'exitSpeech') {
+          return {
+            ...d,
+            exitSpeech: {
+              player: action.player,
+              card: { ...d.exitSpeech?.card, ...action.patch },
             },
           };
         }
@@ -470,18 +406,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         );
         return setPkRounds(d, action.scope, nextRounds);
       });
-
-    case 'SET_FIRST_NIGHT_DEATH_SPEECH':
-      return updateDay(state, action.day, (d) => ({
-        ...d,
-        firstNightDeathSpeech: { player: action.player, notes: action.notes },
-      }));
-
-    case 'SET_EXIT_SPEECH':
-      return updateDay(state, action.day, (d) => ({
-        ...d,
-        exitSpeech: { player: action.player, notes: action.notes },
-      }));
 
     case 'SET_BADGE_ACTION':
       return updateDay(state, action.day, (d) => ({

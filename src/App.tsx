@@ -1,12 +1,7 @@
 import { useEffect } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
-import { ModalProvider } from './context/ModalContext';
 import { Header } from './components/Header/Header';
 import { FlatTimeline } from './components/FlatTimeline/FlatTimeline';
-import { PlayerPickerModal } from './components/modals/PlayerPickerModal';
-import { SeerCheckModal } from './components/modals/SeerCheckModal';
-import { NightDeathModal } from './components/modals/NightDeathModal';
-import { VoteModal } from './components/modals/VoteModal';
 
 const KeyboardShortcuts = () => {
   const { dispatch } = useGame();
@@ -43,11 +38,6 @@ const AppContent = () => {
       <main className="relative flex flex-1 flex-col overflow-y-auto bg-white">
         <FlatTimeline />
       </main>
-
-      <PlayerPickerModal />
-      <SeerCheckModal />
-      <NightDeathModal />
-      <VoteModal />
     </>
   );
 };
@@ -55,9 +45,7 @@ const AppContent = () => {
 function App() {
   return (
     <GameProvider>
-      <ModalProvider>
-        <AppContent />
-      </ModalProvider>
+      <AppContent />
     </GameProvider>
   );
 }

@@ -8,20 +8,6 @@ export interface Player {
   tags: string[];
 }
 
-export type LogType =
-  'speech' | 'divider' | 'night_death' | 'police_registry' | 'vote_record';
-
-export interface LogEntry {
-  id: string;
-  type: LogType;
-  player?: number;
-  round?: number;
-  time?: string;
-  content?: string;
-  title?: string;
-  sceneTitle?: string;
-}
-
 export interface GameState {
   mySeat: string;
   myRole: RoleName;
@@ -29,8 +15,6 @@ export interface GameState {
   currentPlayer: number;
   filterCurrentPlayerOnly: boolean;
   players: Player[];
-  currentSpeechChips: string[];
-  logs: LogEntry[];
   days: Record<number, DayData>;
 }
 
@@ -40,23 +24,9 @@ export interface PersistedGameState {
   currentRound: number;
   currentPlayer: number;
   players: Player[];
-  logs: LogEntry[];
   days: Record<number, DayData>;
   timestamp: number;
 }
-
-export type PickerMode = 'single' | 'multi';
-export type PickerOrder = 'num-first' | 'word-first';
-
-export interface PickerConfig {
-  word: string;
-  order: PickerOrder;
-  mode: PickerMode;
-  title?: string;
-  hint?: string;
-}
-
-export type VoteScene = 'sheriff' | 'exile' | 'pk';
 
 export interface VoteRecord {
   target: number;
@@ -67,7 +37,8 @@ export interface VoteRecord {
 
 export const DAY_COUNT = 5;
 
-export type SpeechPhase = 'sheriff' | 'daytime';
+export type SpeechPhase =
+  'sheriff' | 'daytime' | 'firstNightDeath' | 'exitSpeech';
 export type PkScope = 'sheriff' | 'day';
 
 /** 验人结果（发言者声称验了某人） */
@@ -164,19 +135,10 @@ export interface DayVoteData {
 export interface DayData {
   nightDeath?: NightDeathInfo;
   sheriff?: SheriffData;
-  firstNightDeathSpeech?: { player: number; notes: string };
+  firstNightDeathSpeech?: { player: number; card: SpeechCardData };
   daytime: DaytimeData;
   dayVote?: DayVoteData;
   pkRounds?: PkRoundData[];
-  exitSpeech?: { player: number; notes: string };
+  exitSpeech?: { player: number; card: SpeechCardData };
   badgeAction?: { action: '移交' | '撕警徽'; transferTo?: number };
-}
-
-/** 反向查询：某个目标玩家被谁、在哪、如何提及 */
-export interface PlayerMention {
-  day: number;
-  phase: SpeechPhase;
-  speaker: number;
-  action: 'seerCheck' | 'silverWater' | 'stance' | 'suggestion';
-  detail?: string;
 }

@@ -1,6 +1,3 @@
-import type { TagOption } from './tags';
-import { ACTION_TAGS, ROLE_TAGS, STATUS_TAGS } from './tags';
-
 export type TargetMode = 'single' | 'multi';
 
 export interface ActionOption {
@@ -199,31 +196,3 @@ export const SUGGESTION_OPTIONS: ActionOption[] = [
       'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100',
   },
 ];
-
-export const SEER_RESULT_OPTIONS = ['金水', '查杀'] as const;
-
-export interface BoardConfig {
-  name: string;
-  playerCount: number;
-  roles: string[];
-  claimedIdentityOptions: ActionOption[];
-  stanceOptions: ActionOption[];
-  suggestionOptions: ActionOption[];
-  seerResultOptions: readonly string[];
-  roleTags: TagOption[];
-  statusTags: TagOption[];
-  actionTags: TagOption[];
-}
-
-export const STANDARD_FOOL_BOARD: BoardConfig = {
-  name: '12人标准愚者板',
-  playerCount: 12,
-  roles: ['预言家', '女巫', '猎人', '愚者', '平民', '狼人'],
-  claimedIdentityOptions: CLAIMED_IDENTITY_OPTIONS,
-  stanceOptions: STANCE_OPTIONS,
-  suggestionOptions: SUGGESTION_OPTIONS,
-  seerResultOptions: SEER_RESULT_OPTIONS,
-  roleTags: ROLE_TAGS,
-  statusTags: STATUS_TAGS,
-  actionTags: ACTION_TAGS,
-};

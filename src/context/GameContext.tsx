@@ -24,11 +24,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     <GameContext.Provider value={{ state, dispatch, showToast }}>
       {children}
       <div
-        className={`fixed right-5 bottom-5 z-50 rounded-lg bg-slate-800 px-3 py-2 text-xs text-white shadow-lg transition-opacity duration-200 ${
-          message ? 'opacity-100' : 'pointer-events-none opacity-0'
+        className={`pointer-events-none fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-200 ${
+          message ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        {message}
+        <div className="max-w-[80vw] rounded-xl bg-slate-900/90 px-5 py-3 text-center text-sm font-medium text-white shadow-2xl">
+          {message}
+        </div>
       </div>
     </GameContext.Provider>
   );
