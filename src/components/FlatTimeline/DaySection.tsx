@@ -85,7 +85,7 @@ export const DaySection = ({ day, dayData }: Props) => {
         onChange={(records) => dispatch({ type: 'SET_DAY_VOTE', day, records })}
       />
 
-      {dayData.dayVote?.result ? (
+      {dayData.dayVote?.result && (
         <p className="text-[11px] font-bold text-rose-700">
           结果：
           {dayData.dayVote.result.type === 'exiled'
@@ -96,41 +96,48 @@ export const DaySection = ({ day, dayData }: Props) => {
               }`
             : '平票，进入 PK'}
         </p>
-      ) : (
-        (dayData.dayVote?.records?.length ?? 0) > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {dayData.dayVote?.records?.map((r) => (
-              <button
-                key={r.target}
-                type="button"
-                onClick={() =>
-                  dispatch({
-                    type: 'SET_DAY_VOTE',
-                    day,
-                    result: { type: 'exiled', player: r.target },
-                  })
-                }
-                className="rounded border border-rose-300 bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100"
-              >
-                判 {r.target}号 出局
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
-                dispatch({ type: 'SET_DAY_VOTE', day, result: { type: 'tied_pk' } })
-              }
-              className="rounded border border-slate-300 bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600 hover:bg-slate-100"
-            >
-              平票
-            </button>
-          </div>
-        )
       )}
 
-      {dayData.dayVote?.result?.type === 'tied_pk' && (
-        <PkRoundSection day={day} scope="day" pkRounds={dayData.pkRounds || []} />
+      {(dayData.dayVote?.records?.length ?? 0) > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {dayData.dayVote?.records?.map((r) => (
+            <button
+              key={r.target}
+              type="button"
+              onClick={() =>
+                dispatch({
+                  type: 'SET_DAY_VOTE',
+                  day,
+                  result: { type: 'exiled', player: r.target },
+                })
+              }
+              className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+                dayData.dayVote?.result?.type === 'exiled' &&
+                dayData.dayVote.result.player === r.target
+                  ? 'border-rose-500 bg-rose-100 text-rose-800'
+                  : 'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100'
+              }`}
+            >
+              判 {r.target}号 出局
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              dispatch({ type: 'SET_DAY_VOTE', day, result: { type: 'tied_pk' } })
+            }
+            className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+              dayData.dayVote?.result?.type === 'tied_pk'
+                ? 'border-slate-500 bg-slate-200 text-slate-800'
+                : 'border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            平票
+          </button>
+        </div>
       )}
+
+      <PkRoundSection day={day} scope="day" pkRounds={dayData.pkRounds || []} />
 
       <ExitSpeechSection
         exitSpeech={dayData.exitSpeech}

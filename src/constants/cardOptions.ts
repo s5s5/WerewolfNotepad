@@ -107,6 +107,41 @@ export const STANCE_OPTIONS: ActionOption[] = [
   },
 ];
 
+export const INFO_ACTION_OPTIONS: ActionOption[] = [
+  {
+    label: '查杀',
+    needsTarget: true,
+    targetMode: 'single',
+    className: 'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold',
+  },
+  {
+    label: '金水',
+    needsTarget: true,
+    targetMode: 'single',
+    className:
+      'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold',
+  },
+  {
+    label: '毒',
+    needsTarget: true,
+    targetMode: 'single',
+    className: 'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold',
+  },
+  {
+    label: '银水',
+    needsTarget: true,
+    targetMode: 'single',
+    className:
+      'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold',
+  },
+  {
+    label: '警徽流',
+    needsTarget: true,
+    targetMode: 'multi',
+    className: 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold',
+  },
+];
+
 export const SUGGESTION_OPTIONS: ActionOption[] = [
   {
     label: '建议归票',

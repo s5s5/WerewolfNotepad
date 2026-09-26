@@ -83,7 +83,7 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
             }
           />
 
-          {sheriff?.result ? (
+          {sheriff?.result && (
             <p className="text-[11px] font-bold text-indigo-800">
               结果：
               {sheriff.result.type === 'elected'
@@ -92,39 +92,45 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
                   ? '平票，进入 PK'
                   : '警徽流失'}
             </p>
-          ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {candidates.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() =>
-                    dispatch({
-                      type: 'SET_SHERIFF_RESULT',
-                      day,
-                      result: { type: 'elected', player: p },
-                    })
-                  }
-                  className="rounded border border-indigo-300 bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100"
-                >
-                  判 {p}号 当选
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  dispatch({ type: 'SET_SHERIFF_RESULT', day, result: { type: 'tied_pk' } })
-                }
-                className="rounded border border-slate-300 bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600 hover:bg-slate-100"
-              >
-                平票
-              </button>
-            </div>
           )}
 
-          {sheriff?.result?.type === 'tied_pk' && (
-            <PkRoundSection day={day} scope="sheriff" pkRounds={sheriff.pkRounds || []} />
-          )}
+          <div className="flex flex-wrap gap-1.5">
+            {candidates.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() =>
+                  dispatch({
+                    type: 'SET_SHERIFF_RESULT',
+                    day,
+                    result: { type: 'elected', player: p },
+                  })
+                }
+                className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+                  sheriff?.result?.type === 'elected' && sheriff.result.player === p
+                    ? 'border-indigo-500 bg-indigo-100 text-indigo-800'
+                    : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                }`}
+              >
+                判 {p}号 当选
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                dispatch({ type: 'SET_SHERIFF_RESULT', day, result: { type: 'tied_pk' } })
+              }
+              className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+                sheriff?.result?.type === 'tied_pk'
+                  ? 'border-slate-500 bg-slate-200 text-slate-800'
+                  : 'border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              平票
+            </button>
+          </div>
+
+          <PkRoundSection day={day} scope="sheriff" pkRounds={sheriff?.pkRounds || []} />
         </>
       )}
 

@@ -81,6 +81,11 @@ export interface SilverWaterAction {
   target: number;
 }
 
+/** 毒动作（发言者声称女巫毒了某人） */
+export interface PoisonAction {
+  target: number;
+}
+
 /** 立场动作（发言者对某人表态），type 从 STANCE_OPTIONS 配置中取值 */
 export interface StanceAction {
   type: string;
@@ -97,6 +102,7 @@ export interface SuggestionAction {
 export interface SpeechCardData {
   seerCheck?: SeerCheckAction;
   silverWater?: SilverWaterAction;
+  poison?: PoisonAction;
   claimedIdentity?: string[];
   badgeFlow?: number[];
   withdrew?: boolean;

@@ -58,7 +58,7 @@ const RoundView = ({
         onChange={setResult}
       />
 
-      {round.result ? (
+      {round.result && (
         <p className="text-[11px] font-bold text-rose-700">
           结果：
           {round.result.type === 'exiled'
@@ -67,27 +67,35 @@ const RoundView = ({
               }`
             : '再次平票'}
         </p>
-      ) : (
-        <div className="flex flex-wrap gap-1.5">
-          {round.players.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => finalize({ type: 'exiled', player: p })}
-              className="rounded border border-rose-300 bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100"
-            >
-              判 {p}号 出局
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => finalize({ type: 'tied_again' })}
-            className="rounded border border-slate-300 bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600 hover:bg-slate-100"
-          >
-            仍然平票
-          </button>
-        </div>
       )}
+
+      <div className="flex flex-wrap gap-1.5">
+        {round.players.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => finalize({ type: 'exiled', player: p })}
+            className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+              round.result?.type === 'exiled' && round.result.player === p
+                ? 'border-rose-500 bg-rose-100 text-rose-800'
+                : 'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100'
+            }`}
+          >
+            判 {p}号 出局
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => finalize({ type: 'tied_again' })}
+          className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+            round.result?.type === 'tied_again'
+              ? 'border-slate-500 bg-slate-200 text-slate-800'
+              : 'border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          仍然平票
+        </button>
+      </div>
     </div>
   );
 };
