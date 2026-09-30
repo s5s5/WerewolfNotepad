@@ -4,6 +4,7 @@ import { SpeechOrderControl } from './SpeechOrderControl';
 import { PlayerSpeechCard } from './PlayerSpeechCard';
 import { VoteSection } from './VoteSection';
 import { PkRoundSection } from './PkRoundSection';
+import { getDeadBefore } from '../../utils/deaths';
 import { computeSpeechOrder } from '../../utils/speechOrder';
 import { PLAYER_COUNT, POLICE_CANDIDATE_TAG } from '../../constants/roles';
 import type { DayData } from '../../types/game';
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export const SheriffElection = ({ day, sheriff }: Props) => {
-  const { dispatch } = useGame();
+  const { state, dispatch } = useGame();
   const candidates = sheriff?.candidates || [];
   const speeches = sheriff?.speeches || {};
   const order = computeSpeechOrder(sheriff?.speechOrder, candidates);
@@ -55,6 +56,24 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
     >
       <span className="text-[11px] font-bold text-indigo-900">警长竞选</span>
 
+      <SpeechOrderControl
+        order={sheriff?.speechOrder}
+        disabledPlayers={getDeadBefore(state, day)}
+        dimmedPlayers={nonCandidates}
+        onPick={(n) => {
+          if (!candidates.includes(n))
+            setCandidates([...candidates, n].sort((a, b) => a - b));
+        }}
+        onSet={(o) =>
+          dispatch({
+            type: 'SET_SPEECH_ORDER',
+            day,
+            phase: 'sheriff',
+            order: o,
+          })
+        }
+      />
+
       <div className="rounded-lg border border-indigo-200 bg-white p-2">
         <span className="mb-1 block text-[10px] font-bold text-slate-500">
           上警名单
@@ -71,19 +90,6 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
 
       {candidates.length > 0 && (
         <>
-          <SpeechOrderControl
-            order={sheriff?.speechOrder}
-            onSet={(o) =>
-              dispatch({
-                type: 'SET_SPEECH_ORDER',
-                day,
-                phase: 'sheriff',
-                order: o,
-              })
-            }
-            eligiblePlayers={candidates}
-          />
-
           <div className="space-y-1.5">
             {order.map((p) => (
               <PlayerSpeechCard

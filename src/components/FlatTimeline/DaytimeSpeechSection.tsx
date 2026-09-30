@@ -36,6 +36,7 @@ export const DaytimeSpeechSection = ({ day, daytime }: Props) => {
       <SpeechOrderControl
         order={daytime.speechOrder}
         sheriff={sheriff}
+        disabledPlayers={[...out]}
         onSet={(o) =>
           dispatch({
             type: 'SET_SPEECH_ORDER',

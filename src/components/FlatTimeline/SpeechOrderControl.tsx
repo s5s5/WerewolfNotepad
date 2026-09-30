@@ -7,6 +7,9 @@ interface Props {
   onSet: (order: SpeechOrderConfig) => void;
   eligiblePlayers?: number[];
   sheriff?: number;
+  disabledPlayers?: number[];
+  dimmedPlayers?: number[];
+  onPick?: (player: number) => void;
 }
 
 export const SpeechOrderControl = ({
@@ -14,6 +17,9 @@ export const SpeechOrderControl = ({
   onSet,
   eligiblePlayers,
   sheriff,
+  disabledPlayers,
+  dimmedPlayers,
+  onPick,
 }: Props) => {
   const [firstSpeaker, setFirstSpeaker] = useState<number[]>(
     order ? [order.firstSpeaker] : [],
@@ -27,13 +33,32 @@ export const SpeechOrderControl = ({
 
   const sheriffMode = !!sheriff && source === '警长决定';
 
-  const confirm = () => {
-    if (sheriffMode) {
-      onSet({ firstSpeaker: sheriff, direction, source });
-      return;
+  const apply = (
+    first: number[],
+    dir: '正序' | '逆序',
+    src: '系统决定' | '警长决定',
+  ) => {
+    if (!!sheriff && src === '警长决定') {
+      onSet({ firstSpeaker: sheriff, direction: dir, source: src });
+    } else if (first.length > 0) {
+      onSet({ firstSpeaker: first[0], direction: dir, source: src });
     }
-    if (firstSpeaker.length === 0) return;
-    onSet({ firstSpeaker: firstSpeaker[0], direction, source });
+  };
+
+  const pickFirst = (next: number[]) => {
+    setFirstSpeaker(next);
+    if (next.length > 0) onPick?.(next[0]);
+    apply(next, direction, source);
+  };
+
+  const changeDirection = (d: '正序' | '逆序') => {
+    setDirection(d);
+    apply(firstSpeaker, d, source);
+  };
+
+  const changeSource = (src: '系统决定' | '警长决定') => {
+    setSource(src);
+    apply(firstSpeaker, direction, src);
   };
 
   return (
@@ -57,8 +82,10 @@ export const SpeechOrderControl = ({
         ) : (
           <NumberPicker
             value={firstSpeaker}
-            onChange={setFirstSpeaker}
+            onChange={pickFirst}
             mode="single"
+            disabledPlayers={disabledPlayers}
+            dimmedPlayers={dimmedPlayers}
           />
         )}
         <div className="flex gap-1.5">
@@ -66,7 +93,7 @@ export const SpeechOrderControl = ({
             <button
               key={d}
               type="button"
-              onClick={() => setDirection(d)}
+              onClick={() => changeDirection(d)}
               className={`rounded border px-2 py-0.5 text-[11px] font-medium ${
                 direction === d
                   ? 'border-indigo-600 bg-indigo-600 text-white'
@@ -80,7 +107,7 @@ export const SpeechOrderControl = ({
             <button
               key={s}
               type="button"
-              onClick={() => setSource(s)}
+              onClick={() => changeSource(s)}
               className={`rounded border px-2 py-0.5 text-[11px] font-medium ${
                 source === s
                   ? 'border-amber-500 bg-amber-500 text-white'
@@ -91,14 +118,6 @@ export const SpeechOrderControl = ({
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          disabled={!sheriffMode && firstSpeaker.length === 0}
-          onClick={confirm}
-          className="w-full rounded bg-indigo-600 py-1 text-[11px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          确定顺序
-        </button>
       </div>
       {eligiblePlayers && eligiblePlayers.length === 0 && (
         <p className="mt-1 text-[10px] text-slate-400">暂无可发言玩家</p>

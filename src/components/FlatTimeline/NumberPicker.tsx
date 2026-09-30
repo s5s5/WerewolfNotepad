@@ -6,6 +6,7 @@ interface NumberPickerProps {
   mode: 'single' | 'multi';
   excludePlayer?: number;
   disabledPlayers?: number[];
+  dimmedPlayers?: number[];
   size?: 'xs' | 'sm';
 }
 
@@ -15,6 +16,7 @@ export const NumberPicker = ({
   mode,
   excludePlayer,
   disabledPlayers = [],
+  dimmedPlayers = [],
   size = 'xs',
 }: NumberPickerProps) => {
   const toggle = (n: number) => {
@@ -47,7 +49,9 @@ export const NumberPicker = ({
                 ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-300'
                 : value.includes(n)
                   ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
+                  : dimmedPlayers.includes(n)
+                    ? 'border-slate-200 bg-slate-100 text-slate-400 hover:border-indigo-300 hover:bg-indigo-50'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
             }`}
           >
             {n}
