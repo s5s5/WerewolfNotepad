@@ -1,7 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import { PLAYER_COUNT, STORAGE_KEY } from '../constants/roles';
 import { DEFAULT_BOARD_ID, getBoard } from '../constants/boards';
-import { migrateDays } from '../utils/legacyMigration';
 import {
   DAY_COUNT,
   type DayData,
@@ -59,7 +58,7 @@ const loadFromStorage = (): Partial<GameState> | null => {
         players: data.players,
         days:
           data.days && Object.keys(data.days).length > 0
-            ? { ...createInitialDays(), ...migrateDays(data.days) }
+            ? { ...createInitialDays() }
             : createInitialDays(),
       };
     }
