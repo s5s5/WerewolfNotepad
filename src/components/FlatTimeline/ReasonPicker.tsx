@@ -1,17 +1,22 @@
 import { useState } from 'react';
-import { COMMON_REASONS } from '../../constants/cardOptions';
+import { COMMON_PHRASES } from '../../constants/cardOptions';
 
 interface ReasonPickerProps {
   value: string;
   onChange: (next: string) => void;
 }
 
+export const cleanReason = (v: string) => v.trim().replace(/[；;\s]+$/, '');
+
 export const ReasonPicker = ({ value, onChange }: ReasonPickerProps) => {
   const [customInput, setCustomInput] = useState(value);
 
-  const toggleReason = (reason: string) => {
-    onChange(value === reason ? '' : reason);
-    setCustomInput(value === reason ? '' : reason);
+  const addReason = (reason: string) => {
+    if (customInput.includes(reason)) return;
+    const sep = customInput && !/[；;]\s*$/.test(customInput) ? '；' : '';
+    const next = `${customInput}${sep}${reason}；`;
+    setCustomInput(next);
+    onChange(next);
   };
 
   return (
@@ -20,16 +25,12 @@ export const ReasonPicker = ({ value, onChange }: ReasonPickerProps) => {
         原因（可选）
       </span>
       <div className="mb-1 flex flex-wrap gap-1">
-        {COMMON_REASONS.map((reason) => (
+        {COMMON_PHRASES.map((reason) => (
           <button
             key={reason}
             type="button"
-            onClick={() => toggleReason(reason)}
-            className={`rounded border px-1.5 py-0.5 text-[10px] ${
-              value === reason
-                ? 'border-indigo-600 bg-indigo-600 text-white'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
-            }`}
+            onClick={() => addReason(reason)}
+            className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 hover:border-indigo-300 hover:bg-indigo-50"
           >
             {reason}
           </button>

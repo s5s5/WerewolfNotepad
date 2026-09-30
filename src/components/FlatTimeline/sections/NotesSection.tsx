@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NOTE_PHRASES } from '../../../constants/cardOptions';
+import { COMMON_PHRASES } from '../../../constants/cardOptions';
 import type { SpeechCardData } from '../../../types/game';
 
 interface Props {
@@ -24,7 +24,7 @@ export const NotesSection = ({ card, onPatch }: Props) => {
         自定义备注
       </span>
       <div className="mb-1 flex flex-wrap gap-1">
-        {NOTE_PHRASES.map((p) => (
+        {COMMON_PHRASES.map((p) => (
           <button
             key={p}
             type="button"

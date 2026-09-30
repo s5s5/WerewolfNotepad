@@ -4,7 +4,7 @@ import {
   type ActionOption,
 } from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
-import { ReasonPicker } from '../ReasonPicker';
+import { ReasonPicker, cleanReason } from '../ReasonPicker';
 import type { SpeechCardData, StanceAction } from '../../../types/game';
 
 interface Props {
@@ -38,7 +38,7 @@ export const StanceSection = ({ playerNum, card, onPatch }: Props) => {
   const confirmDisabled =
     !pendingOpt ||
     pendingTargets.length === 0 ||
-    (isCustom(pendingOpt) && !pendingReason.trim());
+    (isCustom(pendingOpt) && !cleanReason(pendingReason));
 
   const confirmTargeted = () => {
     if (!pendingOpt || confirmDisabled) return;
@@ -46,7 +46,7 @@ export const StanceSection = ({ playerNum, card, onPatch }: Props) => {
       onPatch({
         stances: [
           ...stances,
-          { type: pendingReason.trim(), targets: pendingTargets },
+          { type: cleanReason(pendingReason), targets: pendingTargets },
         ],
       });
     } else {
@@ -56,7 +56,7 @@ export const StanceSection = ({ playerNum, card, onPatch }: Props) => {
           {
             type: pendingOpt.label,
             targets: pendingTargets,
-            reason: pendingReason.trim() || undefined,
+            reason: cleanReason(pendingReason) || undefined,
           },
         ],
       });

@@ -3,7 +3,7 @@ import type { ClaimActionConfig } from '../../../constants/boards';
 import { useBoard } from '../../../hooks/useBoard';
 import { applyOrderedPick } from '../../../utils/orderedPick';
 import { NumberPicker } from '../NumberPicker';
-import { ReasonPicker } from '../ReasonPicker';
+import { ReasonPicker, cleanReason } from '../ReasonPicker';
 import { SequencePicker } from '../SequencePicker';
 import type { SpeechCardData } from '../../../types/game';
 
@@ -55,7 +55,7 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
   const confirmTargeted = () => {
     if (!pendingOpt || pendingTargets.length === 0) return;
     if (pendingOpt.details && !pendingDetail) return;
-    const reason = pendingReason.trim() || undefined;
+    const reason = cleanReason(pendingReason) || undefined;
     switch (pendingOpt.type) {
       case 'seerCheck':
         onPatch({

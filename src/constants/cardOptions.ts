@@ -104,18 +104,6 @@ export const STANCE_OPTIONS: ActionOption[] = [
   },
 ];
 
-/** 常点原因预设，供 ReasonPicker 展示为快捷标签 */
-export const COMMON_REASONS = [
-  '逻辑问题',
-  '发言水',
-  '位置学',
-  '悍跳',
-  '心态崩',
-  '抢麦',
-  '投票诡异',
-  '带节奏',
-];
-
 export const SUGGESTION_OPTIONS: ActionOption[] = [
   {
     label: '建议归票',
@@ -168,7 +156,8 @@ export const BADGE_SUGGEST_OPTION: ActionOption = {
     'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 font-medium',
 };
 
-export const NOTE_PHRASES = [
+/** 备注快捷词与原因快捷词共用 */
+export const COMMON_PHRASES = [
   '没防爆',
   '狼视野',
   '没听发言',
@@ -177,4 +166,12 @@ export const NOTE_PHRASES = [
   '搞子',
   '聊情绪',
   '快速过麦',
+  '警徽流',
+  '逻辑问题',
+  '发言水',
+  '位置学',
+  '悍跳',
+  '心态崩',
+  '投票诡异',
+  '带节奏',
 ];

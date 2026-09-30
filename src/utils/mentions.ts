@@ -223,6 +223,18 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
         mentions.push({ day, scene: 'badge', target, action: '撕警徽' });
     }
 
+    const order = dayData.daytime?.speechOrder;
+    const orderSheriff = getSheriffAt(state, day);
+    if (order?.source === '警长决定' && orderSheriff) {
+      mentions.push({
+        day,
+        scene: 'daytime',
+        speaker: orderSheriff,
+        target: orderSheriff,
+        action: `警长决定 ${order.direction}发言`,
+      });
+    }
+
     collectVotes(day, 'dayVote', dayData.dayVote?.records, undefined, mentions);
     if (dayData.dayVote?.result?.type === 'exiled') {
       mentions.push({

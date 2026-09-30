@@ -8,7 +8,7 @@ import {
 import { useBoard } from '../../../hooks/useBoard';
 import { applyOrderedPick } from '../../../utils/orderedPick';
 import { NumberPicker } from '../NumberPicker';
-import { ReasonPicker } from '../ReasonPicker';
+import { ReasonPicker, cleanReason } from '../ReasonPicker';
 import type { SpeechCardData, SuggestionAction } from '../../../types/game';
 
 interface Props {
@@ -68,7 +68,7 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
         {
           type: pendingOpt.label,
           targets: pendingTargets,
-          reason: pendingReason.trim() || undefined,
+          reason: cleanReason(pendingReason) || undefined,
         },
       ],
     });
