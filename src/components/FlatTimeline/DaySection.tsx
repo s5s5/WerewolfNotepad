@@ -83,7 +83,7 @@ export const DaySection = ({ day, dayData }: Props) => {
       />
 
       <BadgeHandling
-        key={`${day}-${badge.sheriff ?? ''}`}
+        key={`badge-${day}-${badge.sheriff ?? ''}`}
         badgeAction={dayData.badgeAction}
         currentSheriff={badge.sheriff}
         torn={badge.torn}
@@ -162,7 +162,7 @@ export const DaySection = ({ day, dayData }: Props) => {
       <PkRoundSection day={day} scope="day" pkRounds={dayData.pkRounds || []} />
 
       <DayDeathSection
-        key={`${day}-${(dayData.dayDeaths ?? []).join(',')}`}
+        key={`dayDeath-${day}-${(dayData.dayDeaths ?? []).join(',')}`}
         day={day}
         dayDeaths={dayData.dayDeaths}
         excluded={getDeadBefore(state, day)}
