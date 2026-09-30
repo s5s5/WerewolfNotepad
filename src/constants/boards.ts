@@ -13,6 +13,7 @@ export interface ClaimActionConfig {
   type: ClaimActionType;
   targetMode: 'single' | 'multi';
   details?: string[];
+  needsTarget?: boolean;
   className: string;
 }
 
@@ -35,6 +36,8 @@ const PURPLE =
   'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold';
 const AMBER =
   'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold';
+const SLATE =
+  'border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold';
 const SKY = 'border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold';
 
 const act = (
@@ -59,6 +62,7 @@ const SILVER = act('银水', 'silverWater', GREEN);
 const BADGE = act('警徽流', 'badgeFlow', AMBER, { targetMode: 'multi' });
 const GUARD = act('守人', 'claim', SKY, { targetMode: 'multi' });
 const SHOOT = act('开枪', 'claim', RED);
+const WITHDRAW = act('退水', 'claim', SLATE, { needsTarget: false });
 
 const good = (name: string): BoardRole => ({ name, team: 'good' });
 const wolf = (name: string): BoardRole => ({ name, team: 'wolf' });
@@ -76,7 +80,7 @@ export const BOARDS: BoardConfig[] = [
       good('平民'),
       wolf('狼人'),
     ],
-    claimActions: [...SEER_ACTIONS, POISON, SILVER, BADGE, SHOOT],
+    claimActions: [...SEER_ACTIONS, POISON, SILVER, BADGE, SHOOT, WITHDRAW],
     suggestRoles: ['预言家', '女巫', '猎人'],
   },
   {
@@ -100,6 +104,7 @@ export const BOARDS: BoardConfig[] = [
       GUARD,
       act('赠技能', 'claim', PURPLE, { details: ['查验', '毒药', '守护'] }),
       SHOOT,
+      WITHDRAW,
     ],
     suggestRoles: ['预言家', '女巫', '守卫'],
   },
@@ -124,6 +129,7 @@ export const BOARDS: BoardConfig[] = [
       GUARD,
       act('决斗', 'claim', RED, { details: ['狼', '好人'] }),
       act('魅惑', 'claim', PURPLE),
+      WITHDRAW,
     ],
     suggestRoles: ['预言家', '女巫', '觉醒守卫', '觉醒骑士'],
   },
@@ -160,6 +166,7 @@ export const BOARDS: BoardConfig[] = [
         details: ['魔镜少女', '女巫', '猎人', '守卫', '平民', '狼人'],
       }),
       SHOOT,
+      WITHDRAW,
     ],
     suggestRoles: ['魔镜少女', '女巫', '猎人', '守卫'],
   },

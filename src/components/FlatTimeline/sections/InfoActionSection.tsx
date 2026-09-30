@@ -23,6 +23,18 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
   const [pendingReason, setPendingReason] = useState('');
 
   const openPicker = (opt: ClaimActionConfig) => {
+    if (opt.needsTarget === false) {
+      onPatch({
+        claims: [
+          ...(card.claims ?? []),
+          {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            kind: opt.label,
+          },
+        ],
+      });
+      return;
+    }
     setPendingOpt(opt);
     setPendingTargets([]);
     setPendingReason('');

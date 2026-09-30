@@ -5,10 +5,11 @@ import type { NightDeathInfo } from '../../types/game';
 interface Props {
   day: number;
   nightDeath: NightDeathInfo | undefined;
+  disabled: number[];
   onSet: (info: NightDeathInfo) => void;
 }
 
-export const NightSection = ({ day, nightDeath, onSet }: Props) => {
+export const NightSection = ({ day, nightDeath, disabled, onSet }: Props) => {
   const [deaths, setDeaths] = useState<number[]>(
     nightDeath?.type === 'deaths' ? nightDeath.players : [],
   );
@@ -56,7 +57,12 @@ export const NightSection = ({ day, nightDeath, onSet }: Props) => {
         >
           设为平安夜
         </button>
-        <NumberPicker value={deaths} onChange={setDeaths} mode="multi" />
+        <NumberPicker
+          value={deaths}
+          onChange={setDeaths}
+          mode="multi"
+          disabledPlayers={disabled}
+        />
         <button
           type="button"
           disabled={deaths.length === 0}

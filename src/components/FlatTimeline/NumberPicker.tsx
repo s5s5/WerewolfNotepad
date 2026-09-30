@@ -5,6 +5,7 @@ interface NumberPickerProps {
   onChange: (next: number[]) => void;
   mode: 'single' | 'multi';
   excludePlayer?: number;
+  disabledPlayers?: number[];
   size?: 'xs' | 'sm';
 }
 
@@ -13,9 +14,11 @@ export const NumberPicker = ({
   onChange,
   mode,
   excludePlayer,
+  disabledPlayers = [],
   size = 'xs',
 }: NumberPickerProps) => {
   const toggle = (n: number) => {
+    if (disabledPlayers.includes(n)) return;
     if (mode === 'single') {
       onChange(value.includes(n) ? [] : [n]);
       return;
@@ -37,11 +40,14 @@ export const NumberPicker = ({
           <button
             key={n}
             type="button"
+            disabled={disabledPlayers.includes(n)}
             onClick={() => toggle(n)}
             className={`rounded border font-bold transition ${btnSize} ${
-              value.includes(n)
-                ? 'border-indigo-600 bg-indigo-600 text-white'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
+              disabledPlayers.includes(n)
+                ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-300'
+                : value.includes(n)
+                  ? 'border-indigo-600 bg-indigo-600 text-white'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
             }`}
           >
             {n}

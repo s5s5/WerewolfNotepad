@@ -35,6 +35,7 @@ const collectFromCard = (
       new Set(c.targets).forEach((t) => push(t, text));
     } else if (c.target !== undefined)
       push(c.target, c.detail ? `${c.kind}:${c.detail}` : c.kind);
+    else push(speaker, c.kind);
   });
   if (card.badgeFlow?.length) {
     const text = `警徽流 ${joinTargets(card.badgeFlow, true)}`;

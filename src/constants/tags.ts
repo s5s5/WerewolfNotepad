@@ -50,10 +50,6 @@ export const STATUS_TAGS: TagOption[] = [
 
 const ALL_ACTION_TAGS: TagOption[] = [
   {
-    label: '上警竞选',
-    className: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200',
-  },
-  {
     label: '愚者翻牌免死',
     className:
       'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200',

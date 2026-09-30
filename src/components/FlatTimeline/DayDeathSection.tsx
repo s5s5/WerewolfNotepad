@@ -25,7 +25,12 @@ export const DayDeathSection = ({ day, dayDeaths, excluded, onSet }: Props) => {
           倒牌：{dayDeaths.map((n) => `${n}号`).join('、')}
         </div>
       )}
-      <NumberPicker value={picked} onChange={setPicked} mode="multi" />
+      <NumberPicker
+        value={picked}
+        onChange={setPicked}
+        mode="multi"
+        disabledPlayers={excluded}
+      />
       <button
         type="button"
         onClick={() => onSet(selectable)}

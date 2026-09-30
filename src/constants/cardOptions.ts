@@ -29,18 +29,17 @@ export const getClaimedIdentityOptions = (
       needsTarget: false,
       className: PURPLE_CLASS,
     },
-    ...ordered.map((r) => ({
-      label: r.name,
-      needsTarget: false,
-      className: r.name === '平民' ? SLATE_CLASS : PURPLE_CLASS,
-    })),
     { label: '好人', needsTarget: false, className: SLATE_CLASS },
     {
       label: '强神',
       needsTarget: false,
       className: 'bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100',
     },
-    { label: '划水', needsTarget: false, className: SLATE_CLASS },
+    ...ordered.map((r) => ({
+      label: r.name,
+      needsTarget: false,
+      className: r.name === '平民' ? SLATE_CLASS : PURPLE_CLASS,
+    })),
     {
       label: '自认狼',
       needsTarget: false,
@@ -77,21 +76,9 @@ export const STANCE_OPTIONS: ActionOption[] = [
       'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
-    label: '没站边',
-    needsTarget: false,
-    className:
-      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
-  },
-  {
     label: '聊情绪',
     needsTarget: false,
     className: 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100',
-  },
-  {
-    label: '退水',
-    needsTarget: false,
-    className:
-      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
     label: '快速过麦',

@@ -8,7 +8,7 @@ import { PkRoundSection } from './PkRoundSection';
 import { PlayerSpeechCard } from './PlayerSpeechCard';
 import { BadgeHandling } from './BadgeHandling';
 import { PLAYER_COUNT } from '../../constants/roles';
-import { getDeadBefore } from '../../utils/deaths';
+import { getDeadBefore, getNightDead } from '../../utils/deaths';
 import { getBadgeStateAt } from '../../utils/sheriff';
 import type { DayData } from '../../types/game';
 
@@ -82,6 +82,7 @@ export const DaySection = ({ day, dayData }: Props) => {
       <NightSection
         day={day}
         nightDeath={dayData.nightDeath}
+        disabled={getDeadBefore(state, day)}
         onSet={(info) => dispatch({ type: 'SET_NIGHT_DEATH', day, info })}
       />
 
@@ -168,7 +169,7 @@ export const DaySection = ({ day, dayData }: Props) => {
         key={`dayDeath-${day}-${(dayData.dayDeaths ?? []).join(',')}`}
         day={day}
         dayDeaths={dayData.dayDeaths}
-        excluded={getDeadBefore(state, day)}
+        excluded={[...getDeadBefore(state, day), ...getNightDead(state, day)]}
         onSet={(players) => dispatch({ type: 'SET_DAY_DEATHS', day, players })}
       />
 

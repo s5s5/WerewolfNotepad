@@ -45,8 +45,20 @@ const migrateCard = (card: SpeechCardData): SpeechCardData => {
   const { withdrew, ...rest } = card as SpeechCardData & {
     withdrew?: boolean;
   };
-  if (!withdrew) return card;
-  return { ...rest, stances: [...(rest.stances ?? []), { type: '退水' }] };
+  const hasStance = rest.stances?.some((s) => s.type === '退水');
+  if (!withdrew && !hasStance) return card;
+  const n =
+    (withdrew ? 1 : 0) +
+    (rest.stances ?? []).filter((s) => s.type === '退水').length;
+  const newClaims = Array.from({ length: Math.min(n, 1) }, () => ({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    kind: '退水',
+  }));
+  return {
+    ...rest,
+    stances: rest.stances?.filter((s) => s.type !== '退水'),
+    claims: [...(rest.claims ?? []), ...newClaims],
+  };
 };
 
 const migrateCards = (
