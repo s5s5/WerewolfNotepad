@@ -4,6 +4,7 @@ import { useBoard } from '../../../hooks/useBoard';
 import { applyOrderedPick } from '../../../utils/orderedPick';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
+import { SequencePicker } from '../SequencePicker';
 import type { SpeechCardData } from '../../../types/game';
 
 interface Props {
@@ -27,6 +28,9 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
     setPendingReason('');
     setPendingDetail('');
   };
+
+  const isSequence =
+    pendingOpt?.type === 'claim' && pendingOpt.targetMode === 'multi';
 
   const handlePickerChange = (next: number[]) => {
     if (pendingOpt?.targetMode !== 'multi') {
@@ -58,6 +62,7 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
               id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
               kind: pendingOpt.label,
               target: pendingTargets[0],
+              targets: isSequence ? pendingTargets : undefined,
               detail: pendingDetail || undefined,
             },
           ],
@@ -116,7 +121,7 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
   card.claims?.forEach((c) => {
     chips.push({
       key: c.id,
-      label: `${c.kind}${c.target ? `:${c.target}号` : ''}${c.detail ? ` · ${c.detail}` : ''}`,
+      label: `${c.kind}${c.targets?.length ? `:${c.targets.join('→')}` : c.target ? `:${c.target}号` : ''}${c.detail ? ` · ${c.detail}` : ''}`,
       onRemove: () =>
         onPatch({
           claims: card.claims?.filter((x) => x.id !== c.id),
@@ -163,9 +168,11 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
           <div className="mb-1 flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-500">
               {pendingOpt.label} · 选择目标
-              {pendingOpt.targetMode === 'multi'
-                ? `（按点击顺序，最多 ${MAX_BADGE_FLOW} 个）`
-                : '（单选）'}
+              {isSequence
+                ? '（按点击顺序，第 1 夜、第 2 夜…）'
+                : pendingOpt.targetMode === 'multi'
+                  ? `（按点击顺序，最多 ${MAX_BADGE_FLOW} 个）`
+                  : '（单选）'}
             </span>
             <button
               type="button"
@@ -175,12 +182,20 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
               取消
             </button>
           </div>
-          <NumberPicker
-            value={pendingTargets}
-            onChange={handlePickerChange}
-            mode={pendingOpt.targetMode || 'single'}
-            excludePlayer={playerNum}
-          />
+          {isSequence ? (
+            <SequencePicker
+              value={pendingTargets}
+              onChange={setPendingTargets}
+              excludePlayer={playerNum}
+            />
+          ) : (
+            <NumberPicker
+              value={pendingTargets}
+              onChange={handlePickerChange}
+              mode={pendingOpt.targetMode || 'single'}
+              excludePlayer={playerNum}
+            />
+          )}
           {pendingOpt.details && (
             <div className="mt-1.5 flex flex-wrap gap-1">
               {pendingOpt.details.map((d) => (

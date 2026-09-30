@@ -20,7 +20,10 @@ export const BadgeHandling = ({
   );
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-2.5">
+    <div
+      data-stage="警徽处理"
+      className="rounded-lg border border-amber-200 bg-amber-50/60 p-2.5"
+    >
       <span className="mb-1.5 block text-[11px] font-bold text-amber-800">
         警徽处理
       </span>

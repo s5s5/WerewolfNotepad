@@ -13,7 +13,10 @@ export const DayDeathSection = ({ day, dayDeaths, excluded, onSet }: Props) => {
   const selectable = picked.filter((p) => !excluded.includes(p));
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-2.5">
+    <div
+      data-stage="白天倒牌"
+      className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-2.5"
+    >
       <span className="block text-[11px] font-bold text-slate-700">
         第 {day} 天 · 白天倒牌
       </span>

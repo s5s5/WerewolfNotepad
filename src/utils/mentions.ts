@@ -30,7 +30,10 @@ const collectFromCard = (
     push(card.silverWater.target, '银水', card.silverWater.reason);
   if (card.poison) push(card.poison.target, '毒', card.poison.reason);
   card.claims?.forEach((c) => {
-    if (c.target !== undefined)
+    if (c.targets?.length) {
+      const text = `${c.kind} ${c.targets.join('→')}`;
+      new Set(c.targets).forEach((t) => push(t, text));
+    } else if (c.target !== undefined)
       push(c.target, c.detail ? `${c.kind}:${c.detail}` : c.kind);
   });
   if (card.badgeFlow?.length) {
@@ -42,7 +45,6 @@ const collectFromCard = (
     const text = targetsAction(s.type, s.targets);
     s.targets.forEach((target) => push(target, text, s.reason));
   });
-  if (card.withdrew) push(speaker, '退水');
 };
 
 const collectVotes = (
@@ -270,7 +272,7 @@ export const describeCard = (card: SpeechCardData): string[] => {
     lines.push(`报 ${card.poison.target}号 中毒${r(card.poison.reason)}`);
   card.claims?.forEach((c) =>
     lines.push(
-      `${c.kind}${c.target ? ` ${c.target}号` : ''}${c.detail ? `：${c.detail}` : ''}`,
+      `${c.kind}${c.targets?.length ? ` ${c.targets.join('→')}号` : c.target ? ` ${c.target}号` : ''}${c.detail ? `：${c.detail}` : ''}`,
     ),
   );
   if (card.badgeFlow?.length) lines.push(`警徽流 ${card.badgeFlow.join('→')}`);
@@ -280,7 +282,6 @@ export const describeCard = (card: SpeechCardData): string[] => {
   card.suggestions?.forEach((s) =>
     lines.push(withTargets(s.type, s.targets, s.reason)),
   );
-  if (card.withdrew) lines.push('退水');
   if (card.notes) lines.push(`备注：${card.notes}`);
   return lines;
 };

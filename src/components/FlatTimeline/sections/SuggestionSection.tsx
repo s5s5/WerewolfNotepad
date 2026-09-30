@@ -129,6 +129,11 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
             key={role}
             type="button"
             onClick={() => {
+              const verbs = ROLE_SUGGEST_VERBS[role] ?? [{ verb: '选' }];
+              if (verbs.length === 1) {
+                selectRoleVerb(role, verbs[0].verb, verbs[0].multi);
+                return;
+              }
               setPendingOpt(null);
               setPendingRole(pendingRole === role ? null : role);
             }}

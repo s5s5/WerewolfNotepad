@@ -49,7 +49,10 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
   ).filter((n) => !candidates.includes(n));
 
   return (
-    <div className="space-y-2.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-3">
+    <div
+      data-stage="警长竞选"
+      className="space-y-2.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-3"
+    >
       <span className="text-[11px] font-bold text-indigo-900">警长竞选</span>
 
       <div className="rounded-lg border border-indigo-200 bg-white p-2">

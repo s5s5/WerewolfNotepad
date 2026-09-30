@@ -33,7 +33,10 @@ const RoundView = ({
   };
 
   return (
-    <div className="space-y-2 rounded-lg border border-orange-200 bg-orange-50/50 p-2.5">
+    <div
+      data-stage={`平票 PK 第 ${roundIndex + 1} 轮`}
+      className="space-y-2 rounded-lg border border-orange-200 bg-orange-50/50 p-2.5"
+    >
       <span className="text-[11px] font-bold text-orange-800">
         平票 PK 第 {roundIndex + 1} 轮：
         {round.players.map((n) => `${n}号`).join(' vs ')}

@@ -38,7 +38,10 @@ export const VoteSection = ({
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-2.5">
+    <div
+      data-stage={title}
+      className="rounded-lg border border-slate-200 bg-white p-2.5"
+    >
       <span className="mb-1.5 block text-[11px] font-bold text-slate-600">
         {title}
       </span>

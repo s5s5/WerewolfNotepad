@@ -37,7 +37,7 @@ const FirstNightDeathSpeech = ({ day, dayData }: Props) => {
   }
 
   return (
-    <div className="space-y-1.5">
+    <div data-stage="首夜遗言" className="space-y-1.5">
       {deadPlayers.map((p) => (
         <div
           key={p}
@@ -64,7 +64,10 @@ export const DaySection = ({ day, dayData }: Props) => {
   const nonCandidates = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
 
   return (
-    <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+    <section
+      data-day={day}
+      className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3"
+    >
       <h2 className="text-sm font-bold text-slate-800">
         第 {day} 天
         {badge.sheriff && (
@@ -186,7 +189,7 @@ const ExitSpeech = ({ day, dayData }: Props) => {
   if (players.length === 0) return null;
 
   return (
-    <div className="space-y-1.5">
+    <div data-stage="出局遗言" className="space-y-1.5">
       {players.map((p) => (
         <div
           key={p}

@@ -54,16 +54,6 @@ const ALL_ACTION_TAGS: TagOption[] = [
     className: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200',
   },
   {
-    label: '已退水',
-    className:
-      'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200',
-  },
-  {
-    label: '快速过麦',
-    className:
-      'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200',
-  },
-  {
     label: '愚者翻牌免死',
     className:
       'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200',

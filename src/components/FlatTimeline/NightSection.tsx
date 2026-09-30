@@ -14,7 +14,10 @@ export const NightSection = ({ day, nightDeath, onSet }: Props) => {
   );
 
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-800/95 p-3">
+    <div
+      data-stage="夜间"
+      className="rounded-lg border border-slate-800 bg-slate-800/95 p-3"
+    >
       <div className="mb-2 flex items-center justify-between">
         <span className="text-[11px] font-bold text-slate-300">
           第 {day} 天 · 夜间

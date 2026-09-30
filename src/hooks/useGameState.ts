@@ -7,6 +7,7 @@ import {
   type EliminationResult,
   type GameState,
   type NightDeathInfo,
+  type PkRoundData,
   type PersistedGameState,
   type Player,
   type RoleName,
@@ -40,6 +41,25 @@ const createInitialState = (boardId: string = DEFAULT_BOARD_ID): GameState => ({
   days: createInitialDays(),
 });
 
+const migrateCard = (card: SpeechCardData): SpeechCardData => {
+  const { withdrew, ...rest } = card as SpeechCardData & {
+    withdrew?: boolean;
+  };
+  if (!withdrew) return card;
+  return { ...rest, stances: [...(rest.stances ?? []), { type: '退水' }] };
+};
+
+const migrateCards = (
+  m: Record<number, SpeechCardData> | undefined,
+): Record<number, SpeechCardData> | undefined =>
+  m &&
+  Object.fromEntries(
+    Object.entries(m).map(([k, c]) => [Number(k), migrateCard(c)]),
+  );
+
+const migratePk = (rounds: PkRoundData[] | undefined) =>
+  rounds?.map((r) => ({ ...r, speeches: migrateCards(r.speeches) ?? {} }));
+
 const migrateDays = (
   days: Record<number, DayData>,
 ): Record<number, DayData> => {
@@ -59,6 +79,22 @@ const migrateDays = (
         ...rest.exitSpeeches,
       };
     }
+    if (next.sheriff) {
+      next.sheriff = {
+        ...next.sheriff,
+        speeches: migrateCards(next.sheriff.speeches) ?? {},
+        pkRounds: migratePk(next.sheriff.pkRounds),
+      };
+    }
+    if (next.daytime) {
+      next.daytime = {
+        ...next.daytime,
+        speeches: migrateCards(next.daytime.speeches) ?? {},
+      };
+    }
+    next.pkRounds = migratePk(next.pkRounds);
+    next.firstNightDeathSpeeches = migrateCards(next.firstNightDeathSpeeches);
+    next.exitSpeeches = migrateCards(next.exitSpeeches);
     out[Number(k)] = next;
   });
   return out;

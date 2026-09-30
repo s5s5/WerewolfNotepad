@@ -3,7 +3,6 @@ import { useGame } from '../../context/GameContext';
 import type { SpeechCardData, SpeechPhase } from '../../types/game';
 import { InfoActionSection } from './sections/InfoActionSection';
 import { ClaimedIdentitySection } from './sections/ClaimedIdentitySection';
-import { WithdrawSection } from './sections/WithdrawSection';
 import { StanceSection } from './sections/StanceSection';
 import { SuggestionSection } from './sections/SuggestionSection';
 import { NotesSection } from './sections/NotesSection';
@@ -26,10 +25,9 @@ const summarize = (card: SpeechCardData): string | null => {
   if (card.badgeFlow?.length) parts.push(`警徽流:${card.badgeFlow.join('→')}`);
   card.claims?.forEach((c) =>
     parts.push(
-      `${c.kind}${c.target ? c.target + '号' : ''}${c.detail ? ':' + c.detail : ''}`,
+      `${c.kind}${c.targets?.length ? c.targets.join('→') + '号' : c.target ? c.target + '号' : ''}${c.detail ? ':' + c.detail : ''}`,
     ),
   );
-  if (card.withdrew) parts.push('已退水');
   if (card.stances?.length) parts.push(`${card.stances.length}条立场`);
   if (card.suggestions?.length) parts.push(`${card.suggestions.length}条建议`);
   if (card.notes) parts.push(card.notes);
@@ -94,7 +92,6 @@ export const PlayerSpeechCard = memo(
             onPatch={onPatch}
           />
           <ClaimedIdentitySection card={card} onPatch={onPatch} />
-          <WithdrawSection phase={phase} card={card} onPatch={onPatch} />
           <StanceSection playerNum={playerNum} card={card} onPatch={onPatch} />
           <SuggestionSection
             playerNum={playerNum}

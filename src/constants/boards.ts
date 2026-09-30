@@ -57,7 +57,7 @@ const SEER_ACTIONS = [
 const POISON = act('毒', 'poison', PURPLE);
 const SILVER = act('银水', 'silverWater', GREEN);
 const BADGE = act('警徽流', 'badgeFlow', AMBER, { targetMode: 'multi' });
-const GUARD = act('守人', 'claim', SKY);
+const GUARD = act('守人', 'claim', SKY, { targetMode: 'multi' });
 const SHOOT = act('开枪', 'claim', RED);
 
 const good = (name: string): BoardRole => ({ name, team: 'good' });

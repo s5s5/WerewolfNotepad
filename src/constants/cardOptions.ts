@@ -83,6 +83,23 @@ export const STANCE_OPTIONS: ActionOption[] = [
       'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
+    label: '聊情绪',
+    needsTarget: false,
+    className: 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100',
+  },
+  {
+    label: '退水',
+    needsTarget: false,
+    className:
+      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
+  },
+  {
+    label: '快速过麦',
+    needsTarget: false,
+    className:
+      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
+  },
+  {
     label: '好人是',
     needsTarget: true,
     targetMode: 'multi',

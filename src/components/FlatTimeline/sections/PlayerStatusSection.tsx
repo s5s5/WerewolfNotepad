@@ -87,7 +87,7 @@ export const PlayerStatusSection = ({ playerNum }: Props) => {
       />
       <TagGroup label="信誉" options={STATUS_TAGS} playerNum={playerNum} />
       <TagGroup
-        label="行为"
+        label="倒牌原因"
         options={getActionTags(board)}
         playerNum={playerNum}
       />

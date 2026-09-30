@@ -78,6 +78,7 @@ export interface ClaimRecord {
   id: string;
   kind: string;
   target?: number;
+  targets?: number[];
   detail?: string;
 }
 
@@ -89,7 +90,6 @@ export interface SpeechCardData {
   claimedIdentity?: string[];
   badgeFlow?: number[];
   claims?: ClaimRecord[];
-  withdrew?: boolean;
   stances?: StanceAction[];
   suggestions?: SuggestionAction[];
   notes?: string;
