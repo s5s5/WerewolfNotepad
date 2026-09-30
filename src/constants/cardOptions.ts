@@ -34,6 +34,7 @@ export const getClaimedIdentityOptions = (
       needsTarget: false,
       className: r.name === '平民' ? SLATE_CLASS : PURPLE_CLASS,
     })),
+    { label: '好人', needsTarget: false, className: SLATE_CLASS },
     {
       label: '强神',
       needsTarget: false,

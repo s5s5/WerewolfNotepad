@@ -40,6 +40,7 @@ export const PlayerSpeechCard = memo(
   ({ day, phase, playerNum, card }: PlayerSpeechCardProps) => {
     const { dispatch, state } = useGame();
     const isMe = String(playerNum) === String(state.mySeat);
+    const isSelected = state.currentPlayer === playerNum;
 
     const onPatch = (patch: Partial<SpeechCardData>) => {
       dispatch({
@@ -56,8 +57,13 @@ export const PlayerSpeechCard = memo(
 
     return (
       <div
+        onClick={() => dispatch({ type: 'SELECT_PLAYER', num: playerNum })}
         className={`rounded-lg border bg-white shadow-2xs ${
-          isMe ? 'border-amber-300 ring-1 ring-amber-300' : 'border-slate-200'
+          isSelected
+            ? 'border-indigo-500 ring-2 ring-indigo-400'
+            : isMe
+              ? 'border-amber-300 ring-1 ring-amber-300'
+              : 'border-slate-200'
         }`}
       >
         <div className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left">

@@ -50,23 +50,78 @@ const collectVotes = (
   });
 };
 
-export const collectAllMentions = (state: GameState): PlayerMention[] => {
-  const mentions: PlayerMention[] = [];
+interface CardVisit {
+  day: number;
+  scene: MentionScene;
+  speaker: number;
+  card: SpeechCardData;
+  round?: number;
+}
 
+const forEachCard = (state: GameState, visit: (v: CardVisit) => void) => {
   Object.entries(state.days).forEach(([dayStr, dayData]) => {
     const day = Number(dayStr);
+    const each = (
+      scene: MentionScene,
+      speeches: Record<number, SpeechCardData>,
+      round?: number,
+    ) =>
+      Object.entries(speeches).forEach(([speaker, card]) =>
+        visit({ day, scene, speaker: Number(speaker), card, round }),
+      );
 
     if (dayData.firstNightDeathSpeech) {
       const { player, card } = dayData.firstNightDeathSpeech;
-      collectFromCard(
-        day,
-        'firstNightDeath',
-        player,
-        card,
-        undefined,
-        mentions,
+      visit({ day, scene: 'firstNightDeath', speaker: player, card });
+    }
+    if (dayData.sheriff) {
+      each('sheriff', dayData.sheriff.speeches);
+      dayData.sheriff.pkRounds?.forEach((r, idx) =>
+        each('sheriffPk', r.speeches, idx + 1),
       );
     }
+    each('daytime', dayData.daytime.speeches);
+    dayData.pkRounds?.forEach((r, idx) => each('dayPk', r.speeches, idx + 1));
+    if (dayData.exitSpeech) {
+      const { player, card } = dayData.exitSpeech;
+      visit({ day, scene: 'exitSpeech', speaker: player, card });
+    }
+  });
+};
+
+const SCENE_ORDER: MentionScene[] = [
+  'nightDeath',
+  'firstNightDeath',
+  'candidacy',
+  'sheriff',
+  'sheriffVote',
+  'sheriffPk',
+  'badge',
+  'daytime',
+  'dayVote',
+  'dayPk',
+  'pkVote',
+  'exitSpeech',
+];
+
+const compareChrono = (
+  a: { day: number; scene: MentionScene; round?: number; speaker?: number },
+  b: { day: number; scene: MentionScene; round?: number; speaker?: number },
+) =>
+  a.day - b.day ||
+  SCENE_ORDER.indexOf(a.scene) - SCENE_ORDER.indexOf(b.scene) ||
+  (a.round || 0) - (b.round || 0) ||
+  (a.speaker || 0) - (b.speaker || 0);
+
+export const collectAllMentions = (state: GameState): PlayerMention[] => {
+  const mentions: PlayerMention[] = [];
+
+  forEachCard(state, ({ day, scene, speaker, card, round }) =>
+    collectFromCard(day, scene, speaker, card, round, mentions),
+  );
+
+  Object.entries(state.days).forEach(([dayStr, dayData]) => {
+    const day = Number(dayStr);
 
     if (dayData.nightDeath?.type === 'deaths') {
       dayData.nightDeath.players.forEach((target) => {
@@ -78,16 +133,6 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
       dayData.sheriff.candidates.forEach((target) => {
         mentions.push({ day, scene: 'candidacy', target, action: '上警' });
       });
-      Object.entries(dayData.sheriff.speeches).forEach(([speaker, card]) => {
-        collectFromCard(
-          day,
-          'sheriff',
-          Number(speaker),
-          card,
-          undefined,
-          mentions,
-        );
-      });
       collectVotes(
         day,
         'sheriffVote',
@@ -96,16 +141,6 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
         mentions,
       );
       dayData.sheriff.pkRounds?.forEach((round, idx) => {
-        Object.entries(round.speeches).forEach(([speaker, card]) => {
-          collectFromCard(
-            day,
-            'sheriffPk',
-            Number(speaker),
-            card,
-            idx + 1,
-            mentions,
-          );
-        });
         collectVotes(day, 'pkVote', round.voteRecords, idx + 1, mentions);
         if (round.result?.type === 'exiled') {
           mentions.push({
@@ -141,17 +176,6 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
       });
     }
 
-    Object.entries(dayData.daytime.speeches).forEach(([speaker, card]) => {
-      collectFromCard(
-        day,
-        'daytime',
-        Number(speaker),
-        card,
-        undefined,
-        mentions,
-      );
-    });
-
     collectVotes(day, 'dayVote', dayData.dayVote?.records, undefined, mentions);
     if (dayData.dayVote?.result?.type === 'exiled') {
       mentions.push({
@@ -165,9 +189,6 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
     }
 
     dayData.pkRounds?.forEach((round, idx) => {
-      Object.entries(round.speeches).forEach(([speaker, card]) => {
-        collectFromCard(day, 'dayPk', Number(speaker), card, idx + 1, mentions);
-      });
       collectVotes(day, 'pkVote', round.voteRecords, idx + 1, mentions);
       if (round.result?.type === 'exiled') {
         mentions.push({
@@ -181,14 +202,63 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
         });
       }
     });
-
-    if (dayData.exitSpeech) {
-      const { player, card } = dayData.exitSpeech;
-      collectFromCard(day, 'exitSpeech', player, card, undefined, mentions);
-    }
   });
 
-  return mentions;
+  return mentions.sort(compareChrono);
+};
+
+export interface SpeechEntry {
+  day: number;
+  scene: MentionScene;
+  round?: number;
+  speaker: number;
+  lines: string[];
+}
+
+const withTargets = (type: string, targets?: number[], reason?: string) =>
+  `${type}${targets?.length ? ` ${targets.map((t) => `${t}号`).join('、')}` : ''}${
+    reason ? `（${reason}）` : ''
+  }`;
+
+export const describeCard = (card: SpeechCardData): string[] => {
+  const lines: string[] = [];
+  const r = (x?: string) => (x ? `（${x}）` : '');
+  if (card.claimedIdentity?.length)
+    lines.push(`声称：${card.claimedIdentity.join('/')}`);
+  if (card.seerCheck)
+    lines.push(
+      `验 ${card.seerCheck.target}号 ${card.seerCheck.result}${r(card.seerCheck.reason)}`,
+    );
+  if (card.silverWater)
+    lines.push(
+      `报 ${card.silverWater.target}号 银水${r(card.silverWater.reason)}`,
+    );
+  if (card.poison)
+    lines.push(`报 ${card.poison.target}号 中毒${r(card.poison.reason)}`);
+  card.claims?.forEach((c) =>
+    lines.push(
+      `${c.kind}${c.target ? ` ${c.target}号` : ''}${c.detail ? `：${c.detail}` : ''}`,
+    ),
+  );
+  if (card.badgeFlow?.length) lines.push(`警徽流 ${card.badgeFlow.join('→')}`);
+  card.stances?.forEach((s) =>
+    lines.push(withTargets(s.type, s.targets, s.reason)),
+  );
+  card.suggestions?.forEach((s) =>
+    lines.push(withTargets(s.type, s.targets, s.reason)),
+  );
+  if (card.withdrew) lines.push('退水');
+  if (card.notes) lines.push(`备注：${card.notes}`);
+  return lines;
+};
+
+export const collectSpeeches = (state: GameState): SpeechEntry[] => {
+  const out: SpeechEntry[] = [];
+  forEachCard(state, ({ day, scene, speaker, card, round }) => {
+    const lines = describeCard(card);
+    if (lines.length > 0) out.push({ day, scene, round, speaker, lines });
+  });
+  return out.sort(compareChrono);
 };
 
 export const SCENE_LABELS: Record<MentionScene, string> = {
