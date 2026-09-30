@@ -1,4 +1,5 @@
 import { useGame } from '../../context/GameContext';
+import { DayDeathSection } from './DayDeathSection';
 import { NightSection } from './NightSection';
 import { SheriffElection } from './SheriffElection';
 import { DaytimeSpeechSection } from './DaytimeSpeechSection';
@@ -7,6 +8,8 @@ import { PkRoundSection } from './PkRoundSection';
 import { PlayerSpeechCard } from './PlayerSpeechCard';
 import { BadgeHandling } from './BadgeHandling';
 import { PLAYER_COUNT } from '../../constants/roles';
+import { getDeadBefore } from '../../utils/deaths';
+import { getBadgeStateAt } from '../../utils/sheriff';
 import type { DayData } from '../../types/game';
 
 interface Props {
@@ -15,35 +18,63 @@ interface Props {
 }
 
 const FirstNightDeathSpeech = ({ day, dayData }: Props) => {
-  const deadPlayer =
-    dayData.nightDeath?.type === 'deaths'
-      ? dayData.nightDeath.players[0]
-      : undefined;
+  const deadPlayers =
+    dayData.nightDeath?.type === 'deaths' ? dayData.nightDeath.players : [];
 
-  if (!deadPlayer) return null;
+  if (deadPlayers.length === 0) return null;
+
+  const sheriffResult = dayData.sheriff?.result?.type;
+  const sheriffDone =
+    day !== 1 ||
+    sheriffResult === 'elected' ||
+    sheriffResult === 'badge_lost' ||
+    sheriffResult === 'aborted';
+
+  if (!sheriffDone) {
+    return (
+      <p className="text-[11px] text-slate-400">警选结束后记录首夜死者遗言</p>
+    );
+  }
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-2.5">
-      <span className="block text-[11px] font-bold text-slate-600">
-        {deadPlayer}号 首夜死者遗言
-      </span>
-      <PlayerSpeechCard
-        day={day}
-        phase="firstNightDeath"
-        playerNum={deadPlayer}
-        card={dayData.firstNightDeathSpeech?.card || {}}
-      />
+    <div className="space-y-1.5">
+      {deadPlayers.map((p) => (
+        <div
+          key={p}
+          className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-2.5"
+        >
+          <span className="block text-[11px] font-bold text-slate-600">
+            {p}号 首夜死者遗言
+          </span>
+          <PlayerSpeechCard
+            day={day}
+            phase="firstNightDeath"
+            playerNum={p}
+            card={dayData.firstNightDeathSpeeches?.[p] || {}}
+          />
+        </div>
+      ))}
     </div>
   );
 };
 
 export const DaySection = ({ day, dayData }: Props) => {
-  const { dispatch } = useGame();
+  const { state, dispatch } = useGame();
+  const badge = getBadgeStateAt(state, day);
   const nonCandidates = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
 
   return (
     <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-      <h2 className="text-sm font-bold text-slate-800">第 {day} 天</h2>
+      <h2 className="text-sm font-bold text-slate-800">
+        第 {day} 天
+        {badge.sheriff && (
+          <span className="ml-2 text-[11px] text-amber-700">
+            当前警长：{badge.sheriff}号
+          </span>
+        )}
+      </h2>
+
+      {day === 1 && <SheriffElection day={day} sheriff={dayData.sheriff} />}
 
       <NightSection
         day={day}
@@ -51,16 +82,15 @@ export const DaySection = ({ day, dayData }: Props) => {
         onSet={(info) => dispatch({ type: 'SET_NIGHT_DEATH', day, info })}
       />
 
-      {day === 1 && <SheriffElection day={day} sheriff={dayData.sheriff} />}
-
-      {day > 1 && (
-        <BadgeHandling
-          badgeAction={dayData.badgeAction}
-          onSet={(action, transferTo) =>
-            dispatch({ type: 'SET_BADGE_ACTION', day, action, transferTo })
-          }
-        />
-      )}
+      <BadgeHandling
+        key={`${day}-${badge.sheriff ?? ''}`}
+        badgeAction={dayData.badgeAction}
+        currentSheriff={badge.sheriff}
+        torn={badge.torn}
+        onSet={(action, transferTo) =>
+          dispatch({ type: 'SET_BADGE_ACTION', day, action, transferTo })
+        }
+      />
 
       <FirstNightDeathSpeech day={day} dayData={dayData} />
 
@@ -131,31 +161,48 @@ export const DaySection = ({ day, dayData }: Props) => {
 
       <PkRoundSection day={day} scope="day" pkRounds={dayData.pkRounds || []} />
 
+      <DayDeathSection
+        key={`${day}-${(dayData.dayDeaths ?? []).join(',')}`}
+        day={day}
+        dayDeaths={dayData.dayDeaths}
+        excluded={getDeadBefore(state, day)}
+        onSet={(players) => dispatch({ type: 'SET_DAY_DEATHS', day, players })}
+      />
+
       <ExitSpeech day={day} dayData={dayData} />
     </section>
   );
 };
 
 const ExitSpeech = ({ day, dayData }: Props) => {
-  const exitedPlayer =
-    dayData.exitSpeech?.player ??
-    (dayData.dayVote?.result?.type === 'exiled'
-      ? dayData.dayVote.result.player
-      : undefined);
+  const exiled =
+    dayData.dayVote?.result?.type === 'exiled'
+      ? [dayData.dayVote.result.player]
+      : [];
+  const players = Array.from(
+    new Set([...exiled, ...(dayData.dayDeaths ?? [])]),
+  );
 
-  if (!exitedPlayer) return null;
+  if (players.length === 0) return null;
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-2.5">
-      <span className="block text-[11px] font-bold text-slate-600">
-        {exitedPlayer}号 出局遗言
-      </span>
-      <PlayerSpeechCard
-        day={day}
-        phase="exitSpeech"
-        playerNum={exitedPlayer}
-        card={dayData.exitSpeech?.card || {}}
-      />
+    <div className="space-y-1.5">
+      {players.map((p) => (
+        <div
+          key={p}
+          className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-2.5"
+        >
+          <span className="block text-[11px] font-bold text-slate-600">
+            {p}号 出局遗言
+          </span>
+          <PlayerSpeechCard
+            day={day}
+            phase="exitSpeech"
+            playerNum={p}
+            card={dayData.exitSpeeches?.[p] || {}}
+          />
+        </div>
+      ))}
     </div>
   );
 };

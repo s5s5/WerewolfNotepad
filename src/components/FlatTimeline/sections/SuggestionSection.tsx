@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import {
+  BADGE_SUGGEST_OPTION,
+  ROLE_SUGGEST_VERBS,
   SUGGESTION_OPTIONS,
   type ActionOption,
 } from '../../../constants/cardOptions';
+import { useBoard } from '../../../hooks/useBoard';
+import { applyOrderedPick } from '../../../utils/orderedPick';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData, SuggestionAction } from '../../../types/game';
@@ -14,7 +18,9 @@ interface Props {
 }
 
 export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
+  const board = useBoard();
   const suggestions = card.suggestions || [];
+  const [pendingRole, setPendingRole] = useState<string | null>(null);
   const [pendingOpt, setPendingOpt] = useState<ActionOption | null>(null);
   const [pendingTargets, setPendingTargets] = useState<number[]>([]);
   const [pendingReason, setPendingReason] = useState('');
@@ -23,7 +29,28 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
     onPatch({ suggestions: suggestions.filter((_, i) => i !== idx) });
   };
 
+  const selectRoleVerb = (role: string, verb: string, multi?: boolean) => {
+    setPendingRole(null);
+    setPendingOpt({
+      label: `建议${role}${verb}`,
+      needsTarget: true,
+      targetMode: multi ? 'multi' : 'single',
+      className: '',
+    });
+    setPendingTargets([]);
+    setPendingReason('');
+  };
+
+  const handlePickerChange = (next: number[]) => {
+    if (pendingOpt?.targetMode === 'multi') {
+      setPendingTargets(applyOrderedPick(pendingTargets, next));
+    } else {
+      setPendingTargets(next);
+    }
+  };
+
   const selectOption = (opt: ActionOption) => {
+    setPendingRole(null);
     if (!opt.needsTarget) {
       onPatch({ suggestions: [...suggestions, { type: opt.label }] });
       return;
@@ -53,7 +80,7 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
   const describe = (s: SuggestionAction) => {
     const base =
       s.targets && s.targets.length > 0
-        ? `${s.type} ${s.targets.map((t) => `${t}号`).join('、')}`
+        ? `${s.type} ${s.targets.join(s.type.includes('决斗') ? '→' : '、')}`
         : s.type;
     return s.reason ? `${base}（${s.reason}）` : base;
   };
@@ -90,13 +117,53 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
             {opt.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => selectOption(BADGE_SUGGEST_OPTION)}
+          className={`rounded border px-2 py-0.5 text-[11px] ${BADGE_SUGGEST_OPTION.className}`}
+        >
+          {BADGE_SUGGEST_OPTION.label}
+        </button>
+        {board.suggestRoles.map((role) => (
+          <button
+            key={role}
+            type="button"
+            onClick={() => {
+              setPendingOpt(null);
+              setPendingRole(pendingRole === role ? null : role);
+            }}
+            className={`rounded border px-2 py-0.5 text-[11px] ${
+              pendingRole === role
+                ? 'border-indigo-600 bg-indigo-600 text-white'
+                : 'border-orange-200 bg-orange-50 text-orange-800 hover:bg-orange-100'
+            }`}
+          >
+            建议{role}
+          </button>
+        ))}
       </div>
+
+      {pendingRole && (
+        <div className="mt-1.5 flex flex-wrap gap-1 rounded border border-slate-200 bg-slate-50 p-1.5">
+          {(ROLE_SUGGEST_VERBS[pendingRole] ?? [{ verb: '选' }]).map((v) => (
+            <button
+              key={v.verb}
+              type="button"
+              onClick={() => selectRoleVerb(pendingRole, v.verb, v.multi)}
+              className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-indigo-50"
+            >
+              {v.verb}
+            </button>
+          ))}
+        </div>
+      )}
 
       {pendingOpt && (
         <div className="mt-1.5 rounded border border-slate-200 bg-slate-50 p-1.5">
           <div className="mb-1 flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-500">
               {pendingOpt.label} · 选择目标
+              {pendingOpt.targetMode === 'multi' && '（按点击顺序）'}
             </span>
             <button
               type="button"
@@ -108,7 +175,7 @@ export const SuggestionSection = ({ playerNum, card, onPatch }: Props) => {
           </div>
           <NumberPicker
             value={pendingTargets}
-            onChange={setPendingTargets}
+            onChange={handlePickerChange}
             mode={pendingOpt.targetMode || 'single'}
             excludePlayer={playerNum}
           />

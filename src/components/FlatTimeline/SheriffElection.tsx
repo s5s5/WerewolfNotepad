@@ -110,7 +110,9 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
                 ? `${sheriff.result.player}号 当选警长`
                 : sheriff.result.type === 'tied_pk'
                   ? '平票，进入 PK'
-                  : '警徽流失'}
+                  : sheriff.result.type === 'aborted'
+                    ? '狼自爆，警选结束'
+                    : '警徽流失'}
             </p>
           )}
 
@@ -153,6 +155,26 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
             >
               平票
             </button>
+            {(['badge_lost', 'aborted'] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() =>
+                  dispatch({
+                    type: 'SET_SHERIFF_RESULT',
+                    day,
+                    result: { type },
+                  })
+                }
+                className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
+                  sheriff?.result?.type === type
+                    ? 'border-slate-500 bg-slate-200 text-slate-800'
+                    : 'border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {type === 'badge_lost' ? '警徽流失' : '狼自爆，警选结束'}
+              </button>
+            ))}
           </div>
 
           <PkRoundSection

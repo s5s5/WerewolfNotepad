@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ClaimActionConfig } from '../../../constants/boards';
 import { useBoard } from '../../../hooks/useBoard';
+import { applyOrderedPick } from '../../../utils/orderedPick';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData } from '../../../types/game';
@@ -32,14 +33,7 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
       setPendingTargets(next);
       return;
     }
-    if (next.length > pendingTargets.length) {
-      const added = next.find((n) => !pendingTargets.includes(n));
-      if (added !== undefined && pendingTargets.length < MAX_BADGE_FLOW) {
-        setPendingTargets([...pendingTargets, added]);
-      }
-    } else {
-      setPendingTargets(pendingTargets.filter((n) => next.includes(n)));
-    }
+    setPendingTargets(applyOrderedPick(pendingTargets, next, MAX_BADGE_FLOW));
   };
 
   const confirmTargeted = () => {

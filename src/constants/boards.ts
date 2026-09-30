@@ -22,6 +22,7 @@ export interface BoardConfig {
   subtitle: string;
   roles: BoardRole[];
   claimActions: ClaimActionConfig[];
+  suggestRoles: string[];
 }
 
 export const DEFAULT_BOARD_ID = 'standard';
@@ -76,6 +77,7 @@ export const BOARDS: BoardConfig[] = [
       wolf('狼人'),
     ],
     claimActions: [...SEER_ACTIONS, POISON, SILVER, BADGE, SHOOT],
+    suggestRoles: ['预言家', '女巫', '猎人'],
   },
   {
     id: 'merchant',
@@ -99,6 +101,7 @@ export const BOARDS: BoardConfig[] = [
       act('赠技能', 'claim', PURPLE, { details: ['查验', '毒药', '守护'] }),
       SHOOT,
     ],
+    suggestRoles: ['预言家', '女巫', '守卫'],
   },
   {
     id: 'knight',
@@ -122,6 +125,7 @@ export const BOARDS: BoardConfig[] = [
       act('决斗', 'claim', RED, { details: ['狼', '好人'] }),
       act('魅惑', 'claim', PURPLE),
     ],
+    suggestRoles: ['预言家', '女巫', '觉醒守卫', '觉醒骑士'],
   },
   {
     id: 'mirror',
@@ -157,6 +161,7 @@ export const BOARDS: BoardConfig[] = [
       }),
       SHOOT,
     ],
+    suggestRoles: ['魔镜少女', '女巫', '猎人', '守卫'],
   },
 ];
 

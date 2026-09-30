@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useGame } from '../../context/GameContext';
+import { getSheriffAt } from '../../utils/sheriff';
 import { PLAYER_COUNT } from '../../constants/roles';
 import type { MentionScene } from '../../types/game';
 import {
   collectAllMentions,
   collectSpeeches,
+  collectVoteLines,
   SCENE_LABELS,
 } from '../../utils/mentions';
 
@@ -32,6 +34,16 @@ export const MentionsPanel = () => {
     return map;
   }, [state]);
 
+  const votesByVoter = useMemo(() => {
+    const map = new Map<number, ReturnType<typeof collectVoteLines>>();
+    collectVoteLines(state).forEach((v) => {
+      map.set(v.voter, [...(map.get(v.voter) || []), v]);
+    });
+    return map;
+  }, [state]);
+
+  const currentSheriff = getSheriffAt(state, Object.keys(state.days).length);
+
   const speechesBySpeaker = useMemo(() => {
     const map = new Map<number, ReturnType<typeof collectSpeeches>>();
     collectSpeeches(state).forEach((e) => {
@@ -50,6 +62,8 @@ export const MentionsPanel = () => {
           const isMe = String(num) === state.mySeat;
           const isSelected = state.currentPlayer === num;
           const speeches = speechesBySpeaker.get(num) || [];
+          const votes = votesByVoter.get(num) || [];
+          const tags = state.players.find((pl) => pl.num === num)?.tags || [];
           const mentions = mentionsByTarget.get(num) || [];
           return (
             <div
@@ -68,7 +82,48 @@ export const MentionsPanel = () => {
             >
               <span className="mb-1 block text-[11px] font-bold text-slate-800">
                 {num}号{isMe && '（我）'}
+                {currentSheriff === num && (
+                  <span className="ml-1 rounded bg-amber-500 px-1 text-[9px] text-white">
+                    警长
+                  </span>
+                )}
               </span>
+
+              {tags.length > 0 && (
+                <div className="mb-1.5 flex flex-wrap gap-1">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-indigo-200 bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-800"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {votes.length > 0 && (
+                <div className="mb-1.5">
+                  <span className="mb-0.5 block text-[10px] font-bold text-emerald-600">
+                    投票
+                  </span>
+                  <ul className="space-y-0.5">
+                    {votes.map((v, idx) => (
+                      <li
+                        key={idx}
+                        className="text-[10.5px] leading-relaxed text-slate-600"
+                      >
+                        {when(v.day, v.scene)}
+                        {v.round ? ` · 第${v.round}轮` : ''}
+                        {' → '}
+                        <span className="font-semibold text-slate-800">
+                          投给 {v.target}号
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="mb-1.5">
                 <span className="mb-0.5 block text-[10px] font-bold text-indigo-600">

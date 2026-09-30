@@ -40,6 +40,30 @@ const createInitialState = (boardId: string = DEFAULT_BOARD_ID): GameState => ({
   days: createInitialDays(),
 });
 
+const migrateDays = (
+  days: Record<number, DayData>,
+): Record<number, DayData> => {
+  const out: Record<number, DayData> = {};
+  Object.entries(days).forEach(([k, d]) => {
+    const { firstNightDeathSpeech, exitSpeech, ...rest } = d;
+    const next: DayData = { ...rest };
+    if (firstNightDeathSpeech) {
+      next.firstNightDeathSpeeches = {
+        [firstNightDeathSpeech.player]: firstNightDeathSpeech.card,
+        ...rest.firstNightDeathSpeeches,
+      };
+    }
+    if (exitSpeech) {
+      next.exitSpeeches = {
+        [exitSpeech.player]: exitSpeech.card,
+        ...rest.exitSpeeches,
+      };
+    }
+    out[Number(k)] = next;
+  });
+  return out;
+};
+
 const loadFromStorage = (): Partial<GameState> | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -57,7 +81,7 @@ const loadFromStorage = (): Partial<GameState> | null => {
         players: data.players,
         days:
           data.days && Object.keys(data.days).length > 0
-            ? { ...createInitialDays(), ...data.days }
+            ? { ...createInitialDays(), ...migrateDays(data.days) }
             : createInitialDays(),
       };
     }
@@ -108,6 +132,7 @@ export type GameAction =
       patch: Partial<SpeechCardData>;
     }
   | { type: 'SET_NIGHT_DEATH'; day: number; info: NightDeathInfo }
+  | { type: 'SET_DAY_DEATHS'; day: number; players: number[] }
   | { type: 'SET_SHERIFF_CANDIDATES'; day: number; candidates: number[] }
   | {
       type: 'SET_SPEECH_ORDER';
@@ -121,7 +146,8 @@ export type GameAction =
       result:
         | { type: 'elected'; player: number }
         | { type: 'tied_pk' }
-        | { type: 'badge_lost' };
+        | { type: 'badge_lost' }
+        | { type: 'aborted' };
     }
   | { type: 'SET_SHERIFF_VOTES'; day: number; records: VoteRecord[] }
   | {
@@ -292,19 +318,21 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         if (action.phase === 'firstNightDeath') {
           return {
             ...d,
-            firstNightDeathSpeech: {
-              player: action.player,
-              card: { ...d.firstNightDeathSpeech?.card, ...action.patch },
-            },
+            firstNightDeathSpeeches: mergeSpeechCard(
+              d.firstNightDeathSpeeches || {},
+              action.player,
+              action.patch,
+            ),
           };
         }
         if (action.phase === 'exitSpeech') {
           return {
             ...d,
-            exitSpeech: {
-              player: action.player,
-              card: { ...d.exitSpeech?.card, ...action.patch },
-            },
+            exitSpeeches: mergeSpeechCard(
+              d.exitSpeeches || {},
+              action.player,
+              action.patch,
+            ),
           };
         }
         return {
@@ -325,6 +353,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return updateDay(state, action.day, (d) => ({
         ...d,
         nightDeath: action.info,
+      }));
+
+    case 'SET_DAY_DEATHS':
+      return updateDay(state, action.day, (d) => ({
+        ...d,
+        dayDeaths: action.players,
       }));
 
     case 'SET_SHERIFF_CANDIDATES':

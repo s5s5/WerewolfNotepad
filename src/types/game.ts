@@ -124,7 +124,8 @@ export interface SheriffData {
   result?:
     | { type: 'elected'; player: number }
     | { type: 'tied_pk' }
-    | { type: 'badge_lost' };
+    | { type: 'badge_lost' }
+    | { type: 'aborted' };
   pkRounds?: PkRoundData[];
 }
 
@@ -152,7 +153,8 @@ export type MentionScene =
   | 'dayVote'
   | 'pkVote'
   | 'badge'
-  | 'nightDeath';
+  | 'nightDeath'
+  | 'dayDeath';
 
 /** 反向查询：某个目标玩家在第几天、哪个环节、被谁、如何提及。speaker 为空表示系统事件或自身行为 */
 export interface PlayerMention {
@@ -168,10 +170,15 @@ export interface PlayerMention {
 export interface DayData {
   nightDeath?: NightDeathInfo;
   sheriff?: SheriffData;
+  /** 旧存档字段，仅用于迁移 */
   firstNightDeathSpeech?: { player: number; card: SpeechCardData };
+  firstNightDeathSpeeches?: Record<number, SpeechCardData>;
   daytime: DaytimeData;
   dayVote?: DayVoteData;
   pkRounds?: PkRoundData[];
+  /** 旧存档字段，仅用于迁移 */
   exitSpeech?: { player: number; card: SpeechCardData };
+  exitSpeeches?: Record<number, SpeechCardData>;
+  dayDeaths?: number[];
   badgeAction?: { action: '移交' | '撕警徽'; transferTo?: number };
 }

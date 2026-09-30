@@ -2,6 +2,8 @@ import { useGame } from '../../context/GameContext';
 import { PLAYER_COUNT } from '../../constants/roles';
 import { SpeechOrderControl } from './SpeechOrderControl';
 import { PlayerSpeechCard } from './PlayerSpeechCard';
+import { getSheriffAt } from '../../utils/sheriff';
+import { getDeadBefore, getNightDead } from '../../utils/deaths';
 import { computeSpeechOrder } from '../../utils/speechOrder';
 import type { DayData } from '../../types/game';
 
@@ -11,10 +13,18 @@ interface Props {
 }
 
 export const DaytimeSpeechSection = ({ day, daytime }: Props) => {
-  const { dispatch } = useGame();
+  const { state, dispatch } = useGame();
+  const sheriff = getSheriffAt(state, day);
 
-  const allPlayers = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
-  const order = computeSpeechOrder(daytime.speechOrder, allPlayers);
+  const out = new Set([
+    ...getDeadBefore(state, day),
+    ...getNightDead(state, day),
+  ]);
+  const allPlayers = Array.from(
+    { length: PLAYER_COUNT },
+    (_, i) => i + 1,
+  ).filter((p) => !out.has(p));
+  const order = computeSpeechOrder(daytime.speechOrder, allPlayers, sheriff);
 
   return (
     <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-2.5">
@@ -22,6 +32,7 @@ export const DaytimeSpeechSection = ({ day, daytime }: Props) => {
 
       <SpeechOrderControl
         order={daytime.speechOrder}
+        sheriff={sheriff}
         onSet={(o) =>
           dispatch({
             type: 'SET_SPEECH_ORDER',

@@ -6,12 +6,14 @@ interface Props {
   order: SpeechOrderConfig | undefined;
   onSet: (order: SpeechOrderConfig) => void;
   eligiblePlayers?: number[];
+  sheriff?: number;
 }
 
 export const SpeechOrderControl = ({
   order,
   onSet,
   eligiblePlayers,
+  sheriff,
 }: Props) => {
   const [firstSpeaker, setFirstSpeaker] = useState<number[]>(
     order ? [order.firstSpeaker] : [],
@@ -23,7 +25,13 @@ export const SpeechOrderControl = ({
     order?.source || '系统决定',
   );
 
+  const sheriffMode = !!sheriff && source === '警长决定';
+
   const confirm = () => {
+    if (sheriffMode) {
+      onSet({ firstSpeaker: sheriff, direction, source });
+      return;
+    }
     if (firstSpeaker.length === 0) return;
     onSet({ firstSpeaker: firstSpeaker[0], direction, source });
   };
@@ -34,16 +42,25 @@ export const SpeechOrderControl = ({
         <span className="text-[11px] font-bold text-slate-600">发言顺序</span>
         {order && (
           <span className="text-[11px] font-bold text-indigo-700">
-            {order.firstSpeaker}号起 · {order.direction} · {order.source}
+            {order.source === '警长决定' && sheriff
+              ? `警长${sheriff}号殿后`
+              : `${order.firstSpeaker}号起`}
+            {` · ${order.direction} · ${order.source}`}
           </span>
         )}
       </div>
       <div className="space-y-1.5">
-        <NumberPicker
-          value={firstSpeaker}
-          onChange={setFirstSpeaker}
-          mode="single"
-        />
+        {sheriffMode ? (
+          <p className="text-[11px] font-bold text-amber-700">
+            警长{sheriff}号殿后
+          </p>
+        ) : (
+          <NumberPicker
+            value={firstSpeaker}
+            onChange={setFirstSpeaker}
+            mode="single"
+          />
+        )}
         <div className="flex gap-1.5">
           {(['正序', '逆序'] as const).map((d) => (
             <button
@@ -76,7 +93,7 @@ export const SpeechOrderControl = ({
         </div>
         <button
           type="button"
-          disabled={firstSpeaker.length === 0}
+          disabled={!sheriffMode && firstSpeaker.length === 0}
           onClick={confirm}
           className="w-full rounded bg-indigo-600 py-1 text-[11px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
         >

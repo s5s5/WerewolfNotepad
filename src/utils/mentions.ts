@@ -1,9 +1,16 @@
+import { getSheriffAt } from './sheriff';
 import type {
   GameState,
   MentionScene,
   PlayerMention,
   SpeechCardData,
 } from '../types/game';
+
+const joinTargets = (targets: number[], arrow: boolean) =>
+  targets.join(arrow ? '→' : '、');
+
+const targetsAction = (type: string, targets: number[]) =>
+  `${type} ${joinTargets(targets, type.includes('决斗'))}`;
 
 const collectFromCard = (
   day: number,
@@ -26,13 +33,15 @@ const collectFromCard = (
     if (c.target !== undefined)
       push(c.target, c.detail ? `${c.kind}:${c.detail}` : c.kind);
   });
-  card.badgeFlow?.forEach((target) => push(target, '警徽流'));
-  card.stances?.forEach((s) =>
-    s.targets?.forEach((target) => push(target, s.type, s.reason)),
-  );
-  card.suggestions?.forEach((s) =>
-    s.targets?.forEach((target) => push(target, s.type, s.reason)),
-  );
+  if (card.badgeFlow?.length) {
+    const text = `警徽流 ${joinTargets(card.badgeFlow, true)}`;
+    card.badgeFlow.forEach((target) => push(target, text));
+  }
+  [...(card.stances ?? []), ...(card.suggestions ?? [])].forEach((s) => {
+    if (!s.targets?.length) return;
+    const text = targetsAction(s.type, s.targets);
+    s.targets.forEach((target) => push(target, text, s.reason));
+  });
   if (card.withdrew) push(speaker, '退水');
 };
 
@@ -70,9 +79,8 @@ const forEachCard = (state: GameState, visit: (v: CardVisit) => void) => {
         visit({ day, scene, speaker: Number(speaker), card, round }),
       );
 
-    if (dayData.firstNightDeathSpeech) {
-      const { player, card } = dayData.firstNightDeathSpeech;
-      visit({ day, scene: 'firstNightDeath', speaker: player, card });
+    if (dayData.firstNightDeathSpeeches) {
+      each('firstNightDeath', dayData.firstNightDeathSpeeches);
     }
     if (dayData.sheriff) {
       each('sheriff', dayData.sheriff.speeches);
@@ -82,10 +90,7 @@ const forEachCard = (state: GameState, visit: (v: CardVisit) => void) => {
     }
     each('daytime', dayData.daytime.speeches);
     dayData.pkRounds?.forEach((r, idx) => each('dayPk', r.speeches, idx + 1));
-    if (dayData.exitSpeech) {
-      const { player, card } = dayData.exitSpeech;
-      visit({ day, scene: 'exitSpeech', speaker: player, card });
-    }
+    if (dayData.exitSpeeches) each('exitSpeech', dayData.exitSpeeches);
   });
 };
 
@@ -101,6 +106,7 @@ const SCENE_ORDER: MentionScene[] = [
   'dayVote',
   'dayPk',
   'pkVote',
+  'dayDeath',
   'exitSpeech',
 ];
 
@@ -128,6 +134,10 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
         mentions.push({ day, scene: 'nightDeath', target, action: '夜晚死亡' });
       });
     }
+
+    dayData.dayDeaths?.forEach((target) => {
+      mentions.push({ day, scene: 'dayDeath', target, action: '白天倒牌' });
+    });
 
     if (dayData.sheriff) {
       dayData.sheriff.candidates.forEach((target) => {
@@ -172,8 +182,12 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
         day,
         scene: 'badge',
         target: dayData.badgeAction.transferTo,
-        action: '警徽移交',
+        action: '获得警徽',
       });
+    } else if (dayData.badgeAction?.action === '撕警徽') {
+      const target = getSheriffAt(state, day - 1);
+      if (target)
+        mentions.push({ day, scene: 'badge', target, action: '撕警徽' });
     }
 
     collectVotes(day, 'dayVote', dayData.dayVote?.records, undefined, mentions);
@@ -207,6 +221,25 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
   return mentions.sort(compareChrono);
 };
 
+export interface VoteLine {
+  day: number;
+  scene: MentionScene;
+  round?: number;
+  voter: number;
+  target: number;
+}
+
+export const collectVoteLines = (state: GameState): VoteLine[] =>
+  collectAllMentions(state)
+    .filter((m) => m.action === '投票' && m.speaker !== undefined)
+    .map((m) => ({
+      day: m.day,
+      scene: m.scene,
+      round: m.round,
+      voter: m.speaker as number,
+      target: m.target,
+    }));
+
 export interface SpeechEntry {
   day: number;
   scene: MentionScene;
@@ -216,7 +249,7 @@ export interface SpeechEntry {
 }
 
 const withTargets = (type: string, targets?: number[], reason?: string) =>
-  `${type}${targets?.length ? ` ${targets.map((t) => `${t}号`).join('、')}` : ''}${
+  `${targets?.length ? targetsAction(type, targets) : type}${
     reason ? `（${reason}）` : ''
   }`;
 
@@ -274,4 +307,5 @@ export const SCENE_LABELS: Record<MentionScene, string> = {
   pkVote: 'PK投票/结果',
   badge: '警徽',
   nightDeath: '夜晚死亡',
+  dayDeath: '白天倒牌',
 };

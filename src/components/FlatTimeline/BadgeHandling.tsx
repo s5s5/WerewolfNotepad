@@ -4,10 +4,17 @@ import type { DayData } from '../../types/game';
 
 interface Props {
   badgeAction: DayData['badgeAction'];
+  currentSheriff?: number;
+  torn?: boolean;
   onSet: (action: '移交' | '撕警徽', transferTo?: number) => void;
 }
 
-export const BadgeHandling = ({ badgeAction, onSet }: Props) => {
+export const BadgeHandling = ({
+  badgeAction,
+  currentSheriff,
+  torn,
+  onSet,
+}: Props) => {
   const [transferTo, setTransferTo] = useState<number[]>(
     badgeAction?.transferTo ? [badgeAction.transferTo] : [],
   );
@@ -17,9 +24,16 @@ export const BadgeHandling = ({ badgeAction, onSet }: Props) => {
       <span className="mb-1.5 block text-[11px] font-bold text-amber-800">
         警徽处理
       </span>
+      <p className="mb-1.5 text-[11px] font-bold text-amber-700">
+        {currentSheriff
+          ? `当前警徽：${currentSheriff}号`
+          : torn
+            ? '警徽已撕'
+            : '当前无警长'}
+      </p>
       {badgeAction && (
         <p className="mb-1.5 text-[11px] font-bold text-amber-700">
-          当前：{badgeAction.action}
+          本日：{badgeAction.action}
           {badgeAction.transferTo ? ` → ${badgeAction.transferTo}号` : ''}
         </p>
       )}

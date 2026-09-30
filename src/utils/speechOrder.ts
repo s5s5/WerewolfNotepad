@@ -5,12 +5,24 @@ import type { SpeechOrderConfig } from '../types/game';
 export const computeSpeechOrder = (
   config: SpeechOrderConfig | undefined,
   eligiblePlayers?: number[],
+  sheriff?: number,
 ): number[] => {
   const pool = eligiblePlayers
     ? [...eligiblePlayers].sort((a, b) => a - b)
     : Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
 
   if (!config) return pool;
+
+  if (config.source === '警长决定' && sheriff && pool.includes(sheriff)) {
+    const idx = pool.indexOf(sheriff);
+    return config.direction === '正序'
+      ? [...pool.slice(idx + 1), ...pool.slice(0, idx + 1)]
+      : [
+          ...pool.slice(0, idx).reverse(),
+          ...pool.slice(idx + 1).reverse(),
+          sheriff,
+        ];
+  }
 
   const { firstSpeaker, direction } = config;
   const startIdx = pool.indexOf(firstSpeaker);

@@ -151,3 +151,26 @@ export const SUGGESTION_OPTIONS: ActionOption[] = [
       'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100',
   },
 ];
+
+export interface RoleSuggestVerb {
+  verb: string;
+  multi?: boolean;
+}
+
+export const ROLE_SUGGEST_VERBS: Record<string, RoleSuggestVerb[]> = {
+  预言家: [{ verb: '验' }],
+  魔镜少女: [{ verb: '验' }],
+  女巫: [{ verb: '毒' }, { verb: '救' }],
+  猎人: [{ verb: '带' }],
+  守卫: [{ verb: '守' }],
+  觉醒守卫: [{ verb: '守' }],
+  觉醒骑士: [{ verb: '决斗', multi: true }],
+};
+
+export const BADGE_SUGGEST_OPTION: ActionOption = {
+  label: '建议警徽给',
+  needsTarget: true,
+  targetMode: 'single',
+  className:
+    'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 font-medium',
+};
