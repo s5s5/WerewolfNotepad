@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import {
-  INFO_ACTION_OPTIONS,
-  type ActionOption,
-} from '../../../constants/cardOptions';
+import type { ClaimActionConfig } from '../../../constants/boards';
+import { useBoard } from '../../../hooks/useBoard';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker } from '../ReasonPicker';
 import type { SpeechCardData } from '../../../types/game';
@@ -16,14 +14,17 @@ interface Props {
 const MAX_BADGE_FLOW = 3;
 
 export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
-  const [pendingOpt, setPendingOpt] = useState<ActionOption | null>(null);
+  const board = useBoard();
+  const [pendingDetail, setPendingDetail] = useState('');
+  const [pendingOpt, setPendingOpt] = useState<ClaimActionConfig | null>(null);
   const [pendingTargets, setPendingTargets] = useState<number[]>([]);
   const [pendingReason, setPendingReason] = useState('');
 
-  const openPicker = (opt: ActionOption) => {
+  const openPicker = (opt: ClaimActionConfig) => {
     setPendingOpt(opt);
     setPendingTargets([]);
     setPendingReason('');
+    setPendingDetail('');
   };
 
   const handlePickerChange = (next: number[]) => {
@@ -43,31 +44,45 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
 
   const confirmTargeted = () => {
     if (!pendingOpt || pendingTargets.length === 0) return;
+    if (pendingOpt.details && !pendingDetail) return;
     const reason = pendingReason.trim() || undefined;
-    switch (pendingOpt.label) {
-      case '查杀':
-      case '金水':
+    switch (pendingOpt.type) {
+      case 'seerCheck':
         onPatch({
           seerCheck: {
             target: pendingTargets[0],
-            result: pendingOpt.label,
+            result: pendingOpt.label as '查杀' | '金水',
             reason,
           },
         });
         break;
-      case '毒':
+      case 'claim':
+        onPatch({
+          claims: [
+            ...(card.claims ?? []),
+            {
+              id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              kind: pendingOpt.label,
+              target: pendingTargets[0],
+              detail: pendingDetail || undefined,
+            },
+          ],
+        });
+        break;
+      case 'poison':
         onPatch({ poison: { target: pendingTargets[0], reason } });
         break;
-      case '银水':
+      case 'silverWater':
         onPatch({ silverWater: { target: pendingTargets[0], reason } });
         break;
-      case '警徽流':
+      case 'badgeFlow':
         onPatch({ badgeFlow: pendingTargets });
         break;
     }
     setPendingOpt(null);
     setPendingTargets([]);
     setPendingReason('');
+    setPendingDetail('');
   };
 
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
@@ -104,6 +119,17 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
     });
   }
 
+  card.claims?.forEach((c) => {
+    chips.push({
+      key: c.id,
+      label: `${c.kind}${c.target ? `:${c.target}号` : ''}${c.detail ? ` · ${c.detail}` : ''}`,
+      onRemove: () =>
+        onPatch({
+          claims: card.claims?.filter((x) => x.id !== c.id),
+        }),
+    });
+  });
+
   return (
     <div>
       <span className="mb-1 block text-[10px] font-bold text-slate-500">
@@ -126,7 +152,7 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
       )}
 
       <div className="flex flex-wrap gap-1">
-        {INFO_ACTION_OPTIONS.map((opt) => (
+        {board.claimActions.map((opt) => (
           <button
             key={opt.label}
             type="button"
@@ -161,12 +187,33 @@ export const InfoActionSection = ({ playerNum, card, onPatch }: Props) => {
             mode={pendingOpt.targetMode || 'single'}
             excludePlayer={playerNum}
           />
-          {pendingOpt.label !== '警徽流' && (
+          {pendingOpt.details && (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {pendingOpt.details.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setPendingDetail(d)}
+                  className={`rounded border px-2 py-0.5 text-[11px] ${
+                    pendingDetail === d
+                      ? 'border-indigo-600 bg-indigo-600 text-white'
+                      : 'border-slate-300 bg-white text-slate-700'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          )}
+          {pendingOpt.type !== 'badgeFlow' && pendingOpt.type !== 'claim' && (
             <ReasonPicker value={pendingReason} onChange={setPendingReason} />
           )}
           <button
             type="button"
-            disabled={pendingTargets.length === 0}
+            disabled={
+              pendingTargets.length === 0 ||
+              (!!pendingOpt.details && !pendingDetail)
+            }
             onClick={confirmTargeted}
             className="mt-1.5 w-full rounded bg-indigo-600 py-1 text-[11px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
           >

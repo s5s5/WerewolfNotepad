@@ -17,7 +17,7 @@ export const NightSection = ({ day, nightDeath, onSet }: Props) => {
     <div className="rounded-lg border border-slate-800 bg-slate-800/95 p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-[11px] font-bold text-slate-300">
-          第 {day} 天 · 夜间（狼人 / 预言家 / 女巫行动占位）
+          第 {day} 天 · 夜间
         </span>
       </div>
 

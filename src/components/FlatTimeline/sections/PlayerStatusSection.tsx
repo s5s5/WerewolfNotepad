@@ -1,7 +1,8 @@
+import { useBoard } from '../../../hooks/useBoard';
 import { useGame } from '../../../context/GameContext';
 import {
-  ACTION_TAGS,
-  ROLE_TAGS,
+  getActionTags,
+  getRoleTags,
   STATUS_TAGS,
   type TagOption,
 } from '../../../constants/tags';
@@ -56,6 +57,7 @@ export const PlayerStatusSection = ({ playerNum }: Props) => {
   const { state, dispatch } = useGame();
   const player = state.players.find((p) => p.num === playerNum);
   const tags = player?.tags || [];
+  const board = useBoard();
 
   return (
     <div className="space-y-1.5 border-t border-dashed border-slate-200 pt-2">
@@ -78,9 +80,17 @@ export const PlayerStatusSection = ({ playerNum }: Props) => {
           </div>
         )}
       </div>
-      <TagGroup label="底牌" options={ROLE_TAGS} playerNum={playerNum} />
+      <TagGroup
+        label="底牌"
+        options={getRoleTags(board)}
+        playerNum={playerNum}
+      />
       <TagGroup label="信誉" options={STATUS_TAGS} playerNum={playerNum} />
-      <TagGroup label="行为" options={ACTION_TAGS} playerNum={playerNum} />
+      <TagGroup
+        label="行为"
+        options={getActionTags(board)}
+        playerNum={playerNum}
+      />
     </div>
   );
 };

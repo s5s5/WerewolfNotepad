@@ -1,42 +1,22 @@
+import type { BoardConfig } from './boards';
+import { FOOL_IMMUNE_TAG } from './roles';
+
 export interface TagOption {
   label: string;
   className: string;
 }
 
-export const ROLE_TAGS: TagOption[] = [
-  {
-    label: '预言家',
-    className:
-      'bg-slate-100 hover:bg-indigo-50 text-slate-700 border-slate-200',
-  },
-  {
-    label: '女巫',
-    className:
-      'bg-slate-100 hover:bg-indigo-50 text-slate-700 border-slate-200',
-  },
-  {
-    label: '猎人',
-    className:
-      'bg-slate-100 hover:bg-indigo-50 text-slate-700 border-slate-200',
-  },
-  {
-    label: '愚者',
-    className:
-      'bg-slate-100 hover:bg-indigo-50 text-slate-700 border-slate-200',
-  },
-  {
-    label: '平民',
-    className:
-      'bg-slate-100 hover:bg-indigo-50 text-slate-700 border-slate-200',
-  },
-  {
-    label: '狼人',
-    className: 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200',
-  },
-  {
-    label: '悍跳狼',
-    className: 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200',
-  },
+const GOOD_ROLE_CLASS =
+  'bg-slate-100 hover:bg-indigo-50 text-slate-700 border-slate-200';
+const WOLF_ROLE_CLASS =
+  'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200';
+
+export const getRoleTags = (board: BoardConfig): TagOption[] => [
+  ...board.roles.map((r) => ({
+    label: r.name,
+    className: r.team === 'wolf' ? WOLF_ROLE_CLASS : GOOD_ROLE_CLASS,
+  })),
+  { label: '悍跳狼', className: WOLF_ROLE_CLASS },
 ];
 
 export const STATUS_TAGS: TagOption[] = [
@@ -68,7 +48,7 @@ export const STATUS_TAGS: TagOption[] = [
   },
 ];
 
-export const ACTION_TAGS: TagOption[] = [
+const ALL_ACTION_TAGS: TagOption[] = [
   {
     label: '上警竞选',
     className: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200',
@@ -117,3 +97,8 @@ export const ACTION_TAGS: TagOption[] = [
       'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200',
   },
 ];
+
+export const getActionTags = (board: BoardConfig): TagOption[] =>
+  board.id === 'standard'
+    ? ALL_ACTION_TAGS
+    : ALL_ACTION_TAGS.filter((t) => t.label !== FOOL_IMMUNE_TAG);

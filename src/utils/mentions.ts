@@ -22,6 +22,10 @@ const collectFromCard = (
   if (card.silverWater)
     push(card.silverWater.target, '银水', card.silverWater.reason);
   if (card.poison) push(card.poison.target, '毒', card.poison.reason);
+  card.claims?.forEach((c) => {
+    if (c.target !== undefined)
+      push(c.target, c.detail ? `${c.kind}:${c.detail}` : c.kind);
+  });
   card.badgeFlow?.forEach((target) => push(target, '警徽流'));
   card.stances?.forEach((s) =>
     s.targets?.forEach((target) => push(target, s.type, s.reason)),

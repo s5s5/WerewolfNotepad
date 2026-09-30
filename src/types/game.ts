@@ -1,7 +1,4 @@
-export const PLAYER_COUNT = 12;
-
-export type RoleName =
-  '未知' | '预言家' | '女巫' | '猎人' | '愚者' | '平民' | '狼人';
+export type RoleName = string;
 
 export interface Player {
   num: number;
@@ -9,6 +6,7 @@ export interface Player {
 }
 
 export interface GameState {
+  boardId: string;
   mySeat: string;
   myRole: RoleName;
   currentRound: number;
@@ -19,6 +17,7 @@ export interface GameState {
 }
 
 export interface PersistedGameState {
+  boardId: string;
   mySeat: string;
   myRole: RoleName;
   currentRound: number;
@@ -74,6 +73,14 @@ export interface SuggestionAction {
   reason?: string;
 }
 
+/** 发言者声称的板子专属动作（守人/赠技能/决斗/验牌等） */
+export interface ClaimRecord {
+  id: string;
+  kind: string;
+  target?: number;
+  detail?: string;
+}
+
 /** 单张发言卡片的完整结构化数据 */
 export interface SpeechCardData {
   seerCheck?: SeerCheckAction;
@@ -81,6 +88,7 @@ export interface SpeechCardData {
   poison?: PoisonAction;
   claimedIdentity?: string[];
   badgeFlow?: number[];
+  claims?: ClaimRecord[];
   withdrew?: boolean;
   stances?: StanceAction[];
   suggestions?: SuggestionAction[];

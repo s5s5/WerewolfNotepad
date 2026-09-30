@@ -16,7 +16,7 @@ interface PlayerSpeechCardProps {
   card: SpeechCardData;
 }
 
-const summarize = (card: SpeechCardData): string => {
+const summarize = (card: SpeechCardData): string | null => {
   const parts: string[] = [];
   if (card.seerCheck)
     parts.push(`验${card.seerCheck.target}号${card.seerCheck.result}`);
@@ -24,11 +24,16 @@ const summarize = (card: SpeechCardData): string => {
   if (card.poison) parts.push(`报${card.poison.target}号中毒`);
   if (card.claimedIdentity?.length) parts.push(card.claimedIdentity.join('/'));
   if (card.badgeFlow?.length) parts.push(`警徽流:${card.badgeFlow.join('→')}`);
+  card.claims?.forEach((c) =>
+    parts.push(
+      `${c.kind}${c.target ? c.target + '号' : ''}${c.detail ? ':' + c.detail : ''}`,
+    ),
+  );
   if (card.withdrew) parts.push('已退水');
   if (card.stances?.length) parts.push(`${card.stances.length}条立场`);
   if (card.suggestions?.length) parts.push(`${card.suggestions.length}条建议`);
   if (card.notes) parts.push(card.notes);
-  return parts.length > 0 ? parts.join(' · ') : '暂无记录';
+  return parts.length > 0 ? parts.join(' · ') : null;
 };
 
 export const PlayerSpeechCard = memo(
@@ -46,16 +51,8 @@ export const PlayerSpeechCard = memo(
       });
     };
 
-    const hasContent =
-      !!card.seerCheck ||
-      !!card.silverWater ||
-      !!card.poison ||
-      (card.claimedIdentity?.length ?? 0) > 0 ||
-      (card.badgeFlow?.length ?? 0) > 0 ||
-      !!card.withdrew ||
-      (card.stances?.length ?? 0) > 0 ||
-      (card.suggestions?.length ?? 0) > 0 ||
-      !!card.notes;
+    const summary = summarize(card);
+    const hasContent = summary !== null;
 
     return (
       <div
@@ -79,7 +76,7 @@ export const PlayerSpeechCard = memo(
                 hasContent ? 'text-slate-600' : 'text-slate-400 italic'
               }`}
             >
-              {summarize(card)}
+              {summary ?? '暂无记录'}
             </span>
           </div>
         </div>

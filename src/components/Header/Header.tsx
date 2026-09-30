@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import { ROLE_OPTIONS, SEAT_OPTIONS } from '../../constants/roles';
+import { SEAT_OPTIONS } from '../../constants/roles';
+import { BOARDS } from '../../constants/boards';
+import { useBoard } from '../../hooks/useBoard';
 import type { RoleName } from '../../types/game';
+import { BoardSwitchConfirmModal } from '../modals/BoardSwitchConfirmModal';
 import { ResetConfirmModal } from '../modals/ResetConfirmModal';
 
 export const Header = () => {
   const { state, dispatch } = useGame();
+  const board = useBoard();
   const [resetOpen, setResetOpen] = useState(false);
+  const [pendingBoard, setPendingBoard] = useState<string | null>(null);
 
   return (
     <header className="z-20 flex flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 shadow-xs">
@@ -16,13 +21,28 @@ export const Header = () => {
         </div>
         <div>
           <h1 className="text-sm leading-tight font-bold text-slate-800 md:text-base">
-            12人标准愚者板记录器
+            12人{board.name}记录器
           </h1>
           <p className="hidden text-[11px] text-slate-400 sm:block">
-            四民 · 四狼 · 预女猎愚 · 警徽流
+            {board.subtitle}
           </p>
         </div>
       </div>
+
+      <select
+        value={state.boardId}
+        onChange={(e) => {
+          if (e.target.value !== state.boardId) setPendingBoard(e.target.value);
+        }}
+        title="切换板子"
+        className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-xs font-semibold text-slate-700 outline-hidden focus:ring-1 focus:ring-indigo-500"
+      >
+        {BOARDS.map((b) => (
+          <option key={b.id} value={b.id}>
+            {b.name}
+          </option>
+        ))}
+      </select>
 
       <div className="flex items-center gap-2 rounded-lg border border-amber-200/90 bg-amber-50/80 px-2.5 py-1 shadow-2xs">
         <span className="flex items-center gap-1 text-xs font-bold text-amber-800">
@@ -49,9 +69,10 @@ export const Header = () => {
           }
           className="rounded border border-amber-300 bg-white px-1.5 py-0.5 text-xs font-semibold text-slate-700 outline-hidden focus:ring-1 focus:ring-amber-500"
         >
-          {ROLE_OPTIONS.map((r) => (
-            <option key={r} value={r}>
-              {r === '未知' ? '底牌未知' : r}
+          <option value="未知">底牌未知</option>
+          {board.roles.map((r) => (
+            <option key={r.name} value={r.name}>
+              {r.name}
             </option>
           ))}
         </select>
@@ -68,6 +89,10 @@ export const Header = () => {
       </div>
 
       <ResetConfirmModal open={resetOpen} onClose={() => setResetOpen(false)} />
+      <BoardSwitchConfirmModal
+        targetBoardId={pendingBoard}
+        onClose={() => setPendingBoard(null)}
+      />
     </header>
   );
 };

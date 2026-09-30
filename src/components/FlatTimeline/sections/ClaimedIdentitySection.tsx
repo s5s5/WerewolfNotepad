@@ -1,4 +1,5 @@
-import { CLAIMED_IDENTITY_OPTIONS } from '../../../constants/cardOptions';
+import { useBoard } from '../../../hooks/useBoard';
+import { getClaimedIdentityOptions } from '../../../constants/cardOptions';
 import type { SpeechCardData } from '../../../types/game';
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export const ClaimedIdentitySection = ({ card, onPatch }: Props) => {
+  const board = useBoard();
   const claimed = card.claimedIdentity || [];
 
   const toggle = (label: string) => {
@@ -23,7 +25,7 @@ export const ClaimedIdentitySection = ({ card, onPatch }: Props) => {
         声称身份
       </span>
       <div className="flex flex-wrap gap-1">
-        {CLAIMED_IDENTITY_OPTIONS.map((opt) => (
+        {getClaimedIdentityOptions(board).map((opt) => (
           <button
             key={opt.label}
             type="button"

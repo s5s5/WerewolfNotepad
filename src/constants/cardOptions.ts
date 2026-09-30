@@ -1,3 +1,5 @@
+import type { BoardConfig } from './boards';
+
 export type TargetMode = 'single' | 'multi';
 
 export interface ActionOption {
@@ -7,55 +9,45 @@ export interface ActionOption {
   className: string;
 }
 
-export const CLAIMED_IDENTITY_OPTIONS: ActionOption[] = [
-  {
-    label: '跳预言家',
-    needsTarget: false,
-    className:
-      'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100',
-  },
-  {
-    label: '平民',
-    needsTarget: false,
-    className:
-      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
-  },
-  {
-    label: '女巫',
-    needsTarget: false,
-    className:
-      'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100',
-  },
-  {
-    label: '猎人',
-    needsTarget: false,
-    className:
-      'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100',
-  },
-  {
-    label: '愚者',
-    needsTarget: false,
-    className:
-      'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100',
-  },
-  {
-    label: '强神',
-    needsTarget: false,
-    className: 'bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100',
-  },
-  {
-    label: '划水',
-    needsTarget: false,
-    className:
-      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
-  },
-  {
-    label: '自认狼',
-    needsTarget: false,
-    className:
-      'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-semibold',
-  },
-];
+const SLATE_CLASS =
+  'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200';
+const PURPLE_CLASS =
+  'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100';
+
+export const getClaimedIdentityOptions = (
+  board: BoardConfig,
+): ActionOption[] => {
+  const goodRoles = board.roles.filter((r) => r.team === 'good');
+  const [seer, ...others] = goodRoles;
+  const ordered = [
+    ...others.filter((r) => r.name === '平民'),
+    ...others.filter((r) => r.name !== '平民'),
+  ];
+  return [
+    {
+      label: `跳${seer.name}`,
+      needsTarget: false,
+      className: PURPLE_CLASS,
+    },
+    ...ordered.map((r) => ({
+      label: r.name,
+      needsTarget: false,
+      className: r.name === '平民' ? SLATE_CLASS : PURPLE_CLASS,
+    })),
+    {
+      label: '强神',
+      needsTarget: false,
+      className: 'bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100',
+    },
+    { label: '划水', needsTarget: false, className: SLATE_CLASS },
+    {
+      label: '自认狼',
+      needsTarget: false,
+      className:
+        'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 font-semibold',
+    },
+  ];
+};
 
 export const STANCE_OPTIONS: ActionOption[] = [
   {
@@ -128,44 +120,6 @@ export const COMMON_REASONS = [
   '抢麦',
   '投票诡异',
   '带节奏',
-];
-
-export const INFO_ACTION_OPTIONS: ActionOption[] = [
-  {
-    label: '查杀',
-    needsTarget: true,
-    targetMode: 'single',
-    className:
-      'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold',
-  },
-  {
-    label: '金水',
-    needsTarget: true,
-    targetMode: 'single',
-    className:
-      'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold',
-  },
-  {
-    label: '毒',
-    needsTarget: true,
-    targetMode: 'single',
-    className:
-      'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold',
-  },
-  {
-    label: '银水',
-    needsTarget: true,
-    targetMode: 'single',
-    className:
-      'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold',
-  },
-  {
-    label: '警徽流',
-    needsTarget: true,
-    targetMode: 'multi',
-    className:
-      'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold',
-  },
 ];
 
 export const SUGGESTION_OPTIONS: ActionOption[] = [

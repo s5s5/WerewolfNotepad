@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import { PLAYER_COUNT, STORAGE_KEY } from '../constants/roles';
+import { DEFAULT_BOARD_ID, getBoard } from '../constants/boards';
 import {
   DAY_COUNT,
   type DayData,
@@ -28,7 +29,8 @@ const createInitialDays = (): Record<number, DayData> => {
   return days;
 };
 
-const createInitialState = (): GameState => ({
+const createInitialState = (boardId: string = DEFAULT_BOARD_ID): GameState => ({
+  boardId,
   mySeat: '',
   myRole: '未知',
   currentRound: 1,
@@ -44,9 +46,12 @@ const loadFromStorage = (): Partial<GameState> | null => {
     if (!raw) return null;
     const data = JSON.parse(raw) as Partial<PersistedGameState>;
     if (data && Array.isArray(data.players)) {
+      const board = getBoard(data.boardId);
+      const myRole = data.myRole || '未知';
       return {
+        boardId: board.id,
         mySeat: data.mySeat || '',
-        myRole: data.myRole || '未知',
+        myRole: board.roles.some((r) => r.name === myRole) ? myRole : '未知',
         currentRound: data.currentRound || 1,
         currentPlayer: data.currentPlayer || 1,
         players: data.players,
@@ -65,6 +70,7 @@ const loadFromStorage = (): Partial<GameState> | null => {
 const saveToStorage = (state: GameState) => {
   try {
     const data: PersistedGameState = {
+      boardId: state.boardId,
       mySeat: state.mySeat,
       myRole: state.myRole,
       currentRound: state.currentRound,
@@ -92,6 +98,7 @@ export type GameAction =
   | { type: 'REMOVE_PLAYER_TAG'; num: number; tag: string }
   | { type: 'SET_PLAYER_TAG'; num: number; tag: string; on: boolean }
   | { type: 'RESET_ALL' }
+  | { type: 'SET_BOARD'; boardId: string }
   // === v2 平铺时间轴 actions ===
   | {
       type: 'UPDATE_SPEECH_CARD';
@@ -259,7 +266,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return { ...state, players };
     }
     case 'RESET_ALL':
-      return createInitialState();
+      return createInitialState(state.boardId);
+    case 'SET_BOARD':
+      return {
+        ...createInitialState(getBoard(action.boardId).id),
+        mySeat: state.mySeat,
+      };
 
     case 'UPDATE_SPEECH_CARD': {
       return updateDay(state, action.day, (d) => {
