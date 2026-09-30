@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { NOTE_PHRASES } from '../../../constants/cardOptions';
 import type { SpeechCardData } from '../../../types/game';
 
 interface Props {
@@ -9,11 +10,31 @@ interface Props {
 export const NotesSection = ({ card, onPatch }: Props) => {
   const [value, setValue] = useState(card.notes || '');
 
+  const addPhrase = (phrase: string) => {
+    if (value.includes(phrase)) return;
+    const sep = value && !/[；;]\s*$/.test(value) ? '；' : '';
+    const next = `${value}${sep}${phrase}；`;
+    setValue(next);
+    onPatch({ notes: next });
+  };
+
   return (
     <div>
       <span className="mb-1 block text-[10px] font-bold text-slate-500">
         自定义备注
       </span>
+      <div className="mb-1 flex flex-wrap gap-1">
+        {NOTE_PHRASES.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => addPhrase(p)}
+            className="rounded border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700 hover:bg-slate-200"
+          >
+            {p}
+          </button>
+        ))}
+      </div>
       <input
         type="text"
         value={value}

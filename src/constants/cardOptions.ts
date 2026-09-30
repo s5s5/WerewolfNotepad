@@ -76,17 +76,6 @@ export const STANCE_OPTIONS: ActionOption[] = [
       'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
   },
   {
-    label: '聊情绪',
-    needsTarget: false,
-    className: 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100',
-  },
-  {
-    label: '快速过麦',
-    needsTarget: false,
-    className:
-      'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200',
-  },
-  {
     label: '好人是',
     needsTarget: true,
     targetMode: 'multi',
@@ -178,3 +167,14 @@ export const BADGE_SUGGEST_OPTION: ActionOption = {
   className:
     'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 font-medium',
 };
+
+export const NOTE_PHRASES = [
+  '没防爆',
+  '狼视野',
+  '没听发言',
+  '对话神职',
+  '找神',
+  '搞子',
+  '聊情绪',
+  '快速过麦',
+];

@@ -12,6 +12,7 @@ export interface GameState {
   currentRound: number;
   currentPlayer: number;
   filterCurrentPlayerOnly: boolean;
+  resetNonce: number;
   players: Player[];
   days: Record<number, DayData>;
 }

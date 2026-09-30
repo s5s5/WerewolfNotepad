@@ -1,13 +1,13 @@
 import { useEffect, useReducer } from 'react';
 import { PLAYER_COUNT, STORAGE_KEY } from '../constants/roles';
 import { DEFAULT_BOARD_ID, getBoard } from '../constants/boards';
+import { migrateDays } from '../utils/legacyMigration';
 import {
   DAY_COUNT,
   type DayData,
   type EliminationResult,
   type GameState,
   type NightDeathInfo,
-  type PkRoundData,
   type PersistedGameState,
   type Player,
   type RoleName,
@@ -37,80 +37,10 @@ const createInitialState = (boardId: string = DEFAULT_BOARD_ID): GameState => ({
   currentRound: 1,
   currentPlayer: 1,
   filterCurrentPlayerOnly: false,
+  resetNonce: 0,
   players: createInitialPlayers(),
   days: createInitialDays(),
 });
-
-const migrateCard = (card: SpeechCardData): SpeechCardData => {
-  const { withdrew, ...rest } = card as SpeechCardData & {
-    withdrew?: boolean;
-  };
-  const hasStance = rest.stances?.some((s) => s.type === '退水');
-  if (!withdrew && !hasStance) return card;
-  const n =
-    (withdrew ? 1 : 0) +
-    (rest.stances ?? []).filter((s) => s.type === '退水').length;
-  const newClaims = Array.from({ length: Math.min(n, 1) }, () => ({
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    kind: '退水',
-  }));
-  return {
-    ...rest,
-    stances: rest.stances?.filter((s) => s.type !== '退水'),
-    claims: [...(rest.claims ?? []), ...newClaims],
-  };
-};
-
-const migrateCards = (
-  m: Record<number, SpeechCardData> | undefined,
-): Record<number, SpeechCardData> | undefined =>
-  m &&
-  Object.fromEntries(
-    Object.entries(m).map(([k, c]) => [Number(k), migrateCard(c)]),
-  );
-
-const migratePk = (rounds: PkRoundData[] | undefined) =>
-  rounds?.map((r) => ({ ...r, speeches: migrateCards(r.speeches) ?? {} }));
-
-const migrateDays = (
-  days: Record<number, DayData>,
-): Record<number, DayData> => {
-  const out: Record<number, DayData> = {};
-  Object.entries(days).forEach(([k, d]) => {
-    const { firstNightDeathSpeech, exitSpeech, ...rest } = d;
-    const next: DayData = { ...rest };
-    if (firstNightDeathSpeech) {
-      next.firstNightDeathSpeeches = {
-        [firstNightDeathSpeech.player]: firstNightDeathSpeech.card,
-        ...rest.firstNightDeathSpeeches,
-      };
-    }
-    if (exitSpeech) {
-      next.exitSpeeches = {
-        [exitSpeech.player]: exitSpeech.card,
-        ...rest.exitSpeeches,
-      };
-    }
-    if (next.sheriff) {
-      next.sheriff = {
-        ...next.sheriff,
-        speeches: migrateCards(next.sheriff.speeches) ?? {},
-        pkRounds: migratePk(next.sheriff.pkRounds),
-      };
-    }
-    if (next.daytime) {
-      next.daytime = {
-        ...next.daytime,
-        speeches: migrateCards(next.daytime.speeches) ?? {},
-      };
-    }
-    next.pkRounds = migratePk(next.pkRounds);
-    next.firstNightDeathSpeeches = migrateCards(next.firstNightDeathSpeeches);
-    next.exitSpeeches = migrateCards(next.exitSpeeches);
-    out[Number(k)] = next;
-  });
-  return out;
-};
 
 const loadFromStorage = (): Partial<GameState> | null => {
   try {
@@ -340,11 +270,15 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return { ...state, players };
     }
     case 'RESET_ALL':
-      return createInitialState(state.boardId);
+      return {
+        ...createInitialState(state.boardId),
+        resetNonce: state.resetNonce + 1,
+      };
     case 'SET_BOARD':
       return {
         ...createInitialState(getBoard(action.boardId).id),
         mySeat: state.mySeat,
+        resetNonce: state.resetNonce + 1,
       };
 
     case 'UPDATE_SPEECH_CARD': {

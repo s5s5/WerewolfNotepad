@@ -42,7 +42,11 @@ export const FlatTimeline = () => {
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-3.5">
       {Array.from({ length: DAY_COUNT }, (_, i) => i + 1).map((day) => (
-        <DaySection key={day} day={day} dayData={state.days[day]} />
+        <DaySection
+          key={`${state.resetNonce}-${day}`}
+          day={day}
+          dayData={state.days[day]}
+        />
       ))}
     </div>
   );

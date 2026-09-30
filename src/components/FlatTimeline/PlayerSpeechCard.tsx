@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useGame } from '../../context/GameContext';
-import type { SpeechCardData, SpeechPhase } from '../../types/game';
+import type { PkScope, SpeechCardData, SpeechPhase } from '../../types/game';
 import { InfoActionSection } from './sections/InfoActionSection';
 import { ClaimedIdentitySection } from './sections/ClaimedIdentitySection';
 import { StanceSection } from './sections/StanceSection';
@@ -13,6 +13,7 @@ interface PlayerSpeechCardProps {
   phase: SpeechPhase;
   playerNum: number;
   card: SpeechCardData;
+  pk?: { scope: PkScope; roundIndex: number };
 }
 
 const summarize = (card: SpeechCardData): string | null => {
@@ -35,12 +36,23 @@ const summarize = (card: SpeechCardData): string | null => {
 };
 
 export const PlayerSpeechCard = memo(
-  ({ day, phase, playerNum, card }: PlayerSpeechCardProps) => {
+  ({ day, phase, playerNum, card, pk }: PlayerSpeechCardProps) => {
     const { dispatch, state } = useGame();
     const isMe = String(playerNum) === String(state.mySeat);
     const isSelected = state.currentPlayer === playerNum;
 
     const onPatch = (patch: Partial<SpeechCardData>) => {
+      if (pk) {
+        dispatch({
+          type: 'UPDATE_PK_SPEECH',
+          day,
+          scope: pk.scope,
+          roundIndex: pk.roundIndex,
+          player: playerNum,
+          patch,
+        });
+        return;
+      }
       dispatch({
         type: 'UPDATE_SPEECH_CARD',
         day,

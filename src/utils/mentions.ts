@@ -6,6 +6,36 @@ import type {
   SpeechCardData,
 } from '../types/game';
 
+const SUPPORT_ACTIONS = [
+  '投票',
+  '获得警徽',
+  '站边',
+  '保',
+  '好人是',
+  '金水',
+  '银水',
+  '建议警徽给',
+  '救',
+  '守',
+];
+const OPPOSE_ACTIONS = [
+  '踩',
+  '狼是',
+  '狼疑是',
+  '查杀',
+  '毒',
+  '建议出',
+  '建议归票',
+  '开枪',
+  '决斗',
+];
+
+export const mentionTone = (action: string): 'support' | 'oppose' | null => {
+  if (SUPPORT_ACTIONS.some((a) => action.startsWith(a))) return 'support';
+  if (OPPOSE_ACTIONS.some((a) => action.startsWith(a))) return 'oppose';
+  return null;
+};
+
 const joinTargets = (targets: number[], arrow: boolean) =>
   targets.join(arrow ? '→' : '、');
 

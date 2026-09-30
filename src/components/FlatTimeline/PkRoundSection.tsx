@@ -50,6 +50,7 @@ const RoundView = ({
             phase="sheriff"
             playerNum={p}
             card={round.speeches[p] || {}}
+            pk={{ scope, roundIndex }}
           />
         ))}
       </div>

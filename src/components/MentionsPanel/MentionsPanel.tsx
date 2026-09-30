@@ -7,10 +7,17 @@ import {
   collectAllMentions,
   collectSpeeches,
   collectVoteLines,
+  mentionTone,
   SCENE_LABELS,
 } from '../../utils/mentions';
 
 const PLAYERS = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
+
+const TONE_CLASS = {
+  support: 'text-emerald-600',
+  oppose: 'text-orange-600',
+  none: 'text-slate-800',
+};
 
 const when = (day: number, scene: MentionScene) =>
   `第${day}天 · ${SCENE_LABELS[scene]}`;
@@ -175,7 +182,9 @@ export const MentionsPanel = () => {
                         {` · ${when(m.day, m.scene)}`}
                         {m.round ? ` · 第${m.round}轮` : ''}
                         {' · '}
-                        <span className="font-semibold text-slate-800">
+                        <span
+                          className={`font-semibold ${TONE_CLASS[mentionTone(m.action) ?? 'none']}`}
+                        >
                           {m.action}
                         </span>
                         {m.reason && (
