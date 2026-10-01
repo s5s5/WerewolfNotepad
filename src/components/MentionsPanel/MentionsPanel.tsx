@@ -60,7 +60,7 @@ export const MentionsPanel = () => {
   }, [state]);
 
   return (
-    <aside className="fixed top-14 right-2 z-30 hidden max-h-[calc(100vh-4.5rem)] w-80 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-lg backdrop-blur-sm lg:flex">
+    <aside className="hidden w-80 flex-shrink-0 flex-col border-l border-slate-200 bg-white lg:flex">
       <div className="border-b border-slate-200 px-3 py-2">
         <h3 className="text-xs font-bold text-slate-700">玩家记录</h3>
       </div>

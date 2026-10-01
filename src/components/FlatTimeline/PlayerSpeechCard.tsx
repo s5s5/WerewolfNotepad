@@ -67,6 +67,7 @@ export const PlayerSpeechCard = memo(
 
     return (
       <div
+        data-speaker={playerNum}
         onClick={() => dispatch({ type: 'SELECT_PLAYER', num: playerNum })}
         className={`rounded-lg border bg-white shadow-2xs ${
           isSelected

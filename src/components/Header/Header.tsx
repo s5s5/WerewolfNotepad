@@ -5,7 +5,6 @@ import { BOARDS } from '../../constants/boards';
 import { useBoard } from '../../hooks/useBoard';
 import type { RoleName } from '../../types/game';
 import { BoardSwitchConfirmModal } from '../modals/BoardSwitchConfirmModal';
-import { CurrentPosition } from './CurrentPosition';
 import { ResetConfirmModal } from '../modals/ResetConfirmModal';
 
 export const Header = () => {
@@ -29,8 +28,6 @@ export const Header = () => {
           </p>
         </div>
       </div>
-
-      <CurrentPosition />
 
       <div className="flex flex-wrap items-center gap-2">
         <select

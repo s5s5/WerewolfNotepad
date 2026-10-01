@@ -52,6 +52,7 @@ export const SheriffElection = ({ day, sheriff }: Props) => {
   return (
     <div
       data-stage="警长竞选"
+      data-nav
       className="space-y-2.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-3"
     >
       <span className="text-[11px] font-bold text-indigo-900">警长竞选</span>

@@ -107,6 +107,8 @@ export type NightDeathInfo =
 
 export type EliminationResult =
   | { type: 'exiled'; player: number; skillTrigger?: string }
+  /** 警长竞选 PK：只选出警长，不出局任何人 */
+  | { type: 'elected'; player: number }
   | { type: 'tied_again' };
 
 /** 平票 PK 轮次数据（警长竞选或白天投票平票后触发） */

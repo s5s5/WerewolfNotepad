@@ -29,6 +29,7 @@ export const DaytimeSpeechSection = ({ day, daytime }: Props) => {
   return (
     <div
       data-stage="白天发言"
+      data-nav
       className="space-y-2 rounded-lg border border-slate-200 bg-white p-2.5"
     >
       <span className="text-[11px] font-bold text-slate-700">白天正赛发言</span>

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { Header } from './components/Header/Header';
 import { FlatTimeline } from './components/FlatTimeline/FlatTimeline';
+import { TimelineNav } from './components/FlatTimeline/TimelineNav';
 import { MentionsPanel } from './components/MentionsPanel/MentionsPanel';
 
 const KeyboardShortcuts = () => {
@@ -36,10 +37,15 @@ const AppContent = () => {
     <>
       <KeyboardShortcuts />
       <Header />
-      <main className="relative flex flex-1 flex-col overflow-y-auto bg-white">
-        <FlatTimeline />
-      </main>
-      <MentionsPanel />
+      <div className="flex min-h-0 flex-1">
+        <main className="relative flex min-w-0 flex-1 overflow-hidden bg-white">
+          <TimelineNav />
+          <div id="timeline-scroll" className="flex-1 overflow-y-auto">
+            <FlatTimeline />
+          </div>
+        </main>
+        <MentionsPanel />
+      </div>
     </>
   );
 };

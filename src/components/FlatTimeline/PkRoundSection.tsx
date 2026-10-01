@@ -28,13 +28,27 @@ const RoundView = ({
     dispatch({ type: 'SET_PK_RESULT', day, scope, roundIndex, records });
   };
 
+  const isSheriff = scope === 'sheriff';
+
   const finalize = (result: EliminationResult) => {
     dispatch({ type: 'SET_PK_RESULT', day, scope, roundIndex, result });
+    if (!isSheriff) return;
+    // 警选 PK 的结果同步到警选结果，警徽归属由它推导
+    dispatch({
+      type: 'SET_SHERIFF_RESULT',
+      day,
+      result:
+        result.type === 'elected'
+          ? { type: 'elected', player: result.player }
+          : { type: 'tied_pk' },
+    });
   };
 
   return (
     <div
       data-stage={`平票 PK 第 ${roundIndex + 1} 轮`}
+      data-nav
+      data-nav-label={`${scope === 'sheriff' ? '警选' : '白天'}PK 第 ${roundIndex + 1} 轮`}
       className="space-y-2 rounded-lg border border-orange-200 bg-orange-50/50 p-2.5"
     >
       <span className="text-[11px] font-bold text-orange-800">
@@ -65,13 +79,15 @@ const RoundView = ({
       {round.result && (
         <p className="text-[11px] font-bold text-rose-700">
           结果：
-          {round.result.type === 'exiled'
-            ? `${round.result.player}号 出局${
-                round.result.skillTrigger
-                  ? `（${round.result.skillTrigger}）`
-                  : ''
-              }`
-            : '再次平票'}
+          {round.result.type === 'elected'
+            ? `${round.result.player}号 当选警长`
+            : round.result.type === 'exiled'
+              ? `${round.result.player}号 出局${
+                  round.result.skillTrigger
+                    ? `（${round.result.skillTrigger}）`
+                    : ''
+                }`
+              : '再次平票'}
         </p>
       )}
 
@@ -80,14 +96,22 @@ const RoundView = ({
           <button
             key={p}
             type="button"
-            onClick={() => finalize({ type: 'exiled', player: p })}
+            onClick={() =>
+              finalize(
+                isSheriff
+                  ? { type: 'elected', player: p }
+                  : { type: 'exiled', player: p },
+              )
+            }
             className={`rounded border px-2 py-0.5 text-[11px] font-bold ${
-              round.result?.type === 'exiled' && round.result.player === p
+              round.result?.type === (isSheriff ? 'elected' : 'exiled') &&
+              'player' in round.result &&
+              round.result.player === p
                 ? 'border-rose-500 bg-rose-100 text-rose-800'
                 : 'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100'
             }`}
           >
-            判 {p}号 出局
+            判 {p}号 {isSheriff ? '当选警长' : '出局'}
           </button>
         ))}
         <button

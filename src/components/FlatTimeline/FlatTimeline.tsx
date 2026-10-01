@@ -8,7 +8,7 @@ export const FlatTimeline = () => {
   const { state } = useGame();
 
   useEffect(() => {
-    const main = document.querySelector('main');
+    const main = document.getElementById('timeline-scroll');
     if (!main) return;
     let raf = 0;
     const update = () => {

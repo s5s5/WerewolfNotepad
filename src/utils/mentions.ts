@@ -185,17 +185,6 @@ export const collectAllMentions = (state: GameState): PlayerMention[] => {
       );
       dayData.sheriff.pkRounds?.forEach((round, idx) => {
         collectVotes(day, 'pkVote', round.voteRecords, idx + 1, mentions);
-        if (round.result?.type === 'exiled') {
-          mentions.push({
-            day,
-            scene: 'pkVote',
-            round: idx + 1,
-            target: round.result.player,
-            action: round.result.skillTrigger
-              ? `PK出局（${round.result.skillTrigger}）`
-              : 'PK出局',
-          });
-        }
       });
       if (dayData.sheriff.result?.type === 'elected') {
         mentions.push({
