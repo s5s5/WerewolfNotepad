@@ -3,6 +3,9 @@ import { useGame } from '../../context/GameContext';
 import { getSheriffAt } from '../../utils/sheriff';
 import { PLAYER_COUNT } from '../../constants/roles';
 import type { MentionScene } from '../../types/game';
+import { SeerBadge } from '../common/SeerBadge';
+import { SeerOverview } from '../SeerOverview/SeerOverview';
+import { getSeerClaimers } from '../../utils/seer';
 import {
   collectAllMentions,
   collectSpeeches,
@@ -49,6 +52,8 @@ export const MentionsPanel = () => {
     return map;
   }, [state]);
 
+  const seers = useMemo(() => getSeerClaimers(state), [state]);
+
   const currentSheriff = getSheriffAt(state, Object.keys(state.days).length);
 
   const speechesBySpeaker = useMemo(() => {
@@ -65,6 +70,7 @@ export const MentionsPanel = () => {
         <h3 className="text-xs font-bold text-slate-700">玩家记录</h3>
       </div>
       <div className="flex-1 space-y-2.5 overflow-y-auto p-2.5">
+        <SeerOverview />
         {PLAYERS.map((num) => {
           const isMe = String(num) === state.mySeat;
           const isSelected = state.currentPlayer === num;
@@ -80,6 +86,8 @@ export const MentionsPanel = () => {
               }}
               onClick={() => dispatch({ type: 'SELECT_PLAYER', num })}
               className={`cursor-pointer rounded-lg border p-2 ${
+                seers.includes(num) ? 'border-l-4 border-l-rose-500' : ''
+              } ${
                 isSelected
                   ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-400'
                   : isMe
@@ -94,6 +102,7 @@ export const MentionsPanel = () => {
                     警长
                   </span>
                 )}
+                <SeerBadge player={num} />
               </span>
 
               {tags.length > 0 && (

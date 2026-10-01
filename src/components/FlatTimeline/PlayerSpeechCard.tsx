@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { useGame } from '../../context/GameContext';
 import type { PkScope, SpeechCardData, SpeechPhase } from '../../types/game';
+import { SeerBadge } from '../common/SeerBadge';
 import { InfoActionSection } from './sections/InfoActionSection';
 import { ClaimedIdentitySection } from './sections/ClaimedIdentitySection';
 import { StanceSection } from './sections/StanceSection';
@@ -88,6 +89,7 @@ export const PlayerSpeechCard = memo(
             >
               {playerNum}
             </span>
+            <SeerBadge player={playerNum} />
             <span
               className={`truncate text-[11px] ${
                 hasContent ? 'text-slate-600' : 'text-slate-400 italic'

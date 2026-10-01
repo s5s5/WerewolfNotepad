@@ -7,6 +7,7 @@ interface NumberPickerProps {
   excludePlayer?: number;
   disabledPlayers?: number[];
   dimmedPlayers?: number[];
+  highlightPlayers?: number[];
   size?: 'xs' | 'sm';
 }
 
@@ -17,6 +18,7 @@ export const NumberPicker = ({
   excludePlayer,
   disabledPlayers = [],
   dimmedPlayers = [],
+  highlightPlayers = [],
   size = 'xs',
 }: NumberPickerProps) => {
   const toggle = (n: number) => {
@@ -45,6 +47,8 @@ export const NumberPicker = ({
             disabled={disabledPlayers.includes(n)}
             onClick={() => toggle(n)}
             className={`rounded border font-bold transition ${btnSize} ${
+              highlightPlayers.includes(n) ? 'ring-2 ring-rose-400' : ''
+            } ${
               disabledPlayers.includes(n)
                 ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-300'
                 : value.includes(n)

@@ -92,7 +92,7 @@ const collectVotes = (
   });
 };
 
-interface CardVisit {
+export interface CardVisit {
   day: number;
   scene: MentionScene;
   speaker: number;
@@ -100,7 +100,10 @@ interface CardVisit {
   round?: number;
 }
 
-const forEachCard = (state: GameState, visit: (v: CardVisit) => void) => {
+export const forEachCard = (
+  state: GameState,
+  visit: (v: CardVisit) => void,
+) => {
   Object.entries(state.days).forEach(([dayStr, dayData]) => {
     const day = Number(dayStr);
     const each = (
@@ -143,7 +146,7 @@ const SCENE_ORDER: MentionScene[] = [
   'exitSpeech',
 ];
 
-const compareChrono = (
+export const compareChrono = (
   a: { day: number; scene: MentionScene; round?: number; speaker?: number },
   b: { day: number; scene: MentionScene; round?: number; speaker?: number },
 ) =>

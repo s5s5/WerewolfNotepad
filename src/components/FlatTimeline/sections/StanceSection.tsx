@@ -5,6 +5,8 @@ import {
 } from '../../../constants/cardOptions';
 import { NumberPicker } from '../NumberPicker';
 import { ReasonPicker, cleanReason } from '../ReasonPicker';
+import { useGame } from '../../../context/GameContext';
+import { getSeerClaimers } from '../../../utils/seer';
 import type { SpeechCardData, StanceAction } from '../../../types/game';
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
 const isCustom = (opt: ActionOption) => opt.label === '自定义';
 
 export const StanceSection = ({ playerNum, card, onPatch }: Props) => {
+  const { state } = useGame();
   const stances = card.stances || [];
   const [pendingOpt, setPendingOpt] = useState<ActionOption | null>(null);
   const [pendingTargets, setPendingTargets] = useState<number[]>([]);
@@ -128,6 +131,7 @@ export const StanceSection = ({ playerNum, card, onPatch }: Props) => {
             onChange={setPendingTargets}
             mode={pendingOpt.targetMode || 'single'}
             excludePlayer={playerNum}
+            highlightPlayers={getSeerClaimers(state)}
           />
           <ReasonPicker value={pendingReason} onChange={setPendingReason} />
           <button

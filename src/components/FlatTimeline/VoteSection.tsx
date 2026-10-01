@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { NumberPicker } from './NumberPicker';
+import { useGame } from '../../context/GameContext';
+import { getSeerClaimers } from '../../utils/seer';
 import type { VoteRecord } from '../../types/game';
 
 interface Props {
@@ -17,6 +19,8 @@ export const VoteSection = ({
   records,
   onChange,
 }: Props) => {
+  const { state } = useGame();
+  const seers = getSeerClaimers(state);
   const [target, setTarget] = useState<number[]>([]);
   const [voters, setVoters] = useState<number[]>([]);
 
@@ -56,6 +60,7 @@ export const VoteSection = ({
             onChange={setTarget}
             mode="single"
             excludePlayer={undefined}
+            highlightPlayers={seers}
           />
           {eligibleTargets && (
             <p className="mt-0.5 text-[9px] text-slate-400">
@@ -68,7 +73,12 @@ export const VoteSection = ({
           <span className="mb-1 block text-[10px] font-medium text-slate-400">
             投票人（可多选）
           </span>
-          <NumberPicker value={voters} onChange={setVoters} mode="multi" />
+          <NumberPicker
+            value={voters}
+            onChange={setVoters}
+            mode="multi"
+            highlightPlayers={seers}
+          />
           {eligibleVoters && (
             <p className="mt-0.5 text-[9px] text-slate-400">
               有票玩家：{eligibleVoters.map((n) => `${n}号`).join('、') || '无'}

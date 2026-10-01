@@ -14,18 +14,21 @@ const SLATE_CLASS =
 const PURPLE_CLASS =
   'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100';
 
+export const getSeerClaimLabel = (board: BoardConfig): string =>
+  `跳${board.roles.find((r) => r.team === 'good')?.name ?? '预言家'}`;
+
 export const getClaimedIdentityOptions = (
   board: BoardConfig,
 ): ActionOption[] => {
   const goodRoles = board.roles.filter((r) => r.team === 'good');
-  const [seer, ...others] = goodRoles;
+  const [, ...others] = goodRoles;
   const ordered = [
     ...others.filter((r) => r.name === '平民'),
     ...others.filter((r) => r.name !== '平民'),
   ];
   return [
     {
-      label: `跳${seer.name}`,
+      label: getSeerClaimLabel(board),
       needsTarget: false,
       className: PURPLE_CLASS,
     },
